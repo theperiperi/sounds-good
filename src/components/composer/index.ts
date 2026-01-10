@@ -1,0 +1,1 @@
+export { SheetMusicEditor } from "./SheetMusicEditor";
