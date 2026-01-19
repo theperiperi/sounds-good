@@ -26,7 +26,7 @@ export const grades: Grade[] = [
     id: 1,
     title: "Grade 1 - Beginner",
     description: "First steps into music. Learn basic notation, posture, and simple melodies.",
-    color: "from-green-500 to-emerald-600",
+    color: "from-gold to-gold-dark",
     modules: [
       {
         id: "g1-basics",
@@ -75,7 +75,7 @@ export const grades: Grade[] = [
     id: 2,
     title: "Grade 2 - Elementary",
     description: "Expand your range with new keys and simple pieces.",
-    color: "from-blue-500 to-indigo-600",
+    color: "from-gold-dark to-gold",
     modules: [
       {
         id: "g2-new-keys",
@@ -113,7 +113,7 @@ export const grades: Grade[] = [
     id: 3,
     title: "Grade 3 - Lower Intermediate",
     description: "Hands together playing and minor keys.",
-    color: "from-purple-500 to-violet-600",
+    color: "from-gold to-gold-dark",
     modules: [
       {
         id: "g3-minor",
@@ -141,7 +141,7 @@ export const grades: Grade[] = [
     id: 4,
     title: "Grade 4 - Intermediate",
     description: "Arpeggios, more complex rhythms, and expressive playing.",
-    color: "from-orange-500 to-amber-600",
+    color: "from-gold-dark to-gold",
     modules: [
       {
         id: "g4-arpeggios",
@@ -159,7 +159,7 @@ export const grades: Grade[] = [
     id: 5,
     title: "Grade 5 - Upper Intermediate",
     description: "Music theory exam level. All major scales, chromatic scale, and sight-reading.",
-    color: "from-red-500 to-rose-600",
+    color: "from-gold to-gold-dark",
     modules: [
       {
         id: "g5-all-majors",
@@ -187,7 +187,7 @@ export const grades: Grade[] = [
     id: 6,
     title: "Grade 6 - Advanced",
     description: "Advanced repertoire and technique.",
-    color: "from-teal-500 to-cyan-600",
+    color: "from-gold-dark to-gold",
     modules: [
       {
         id: "g6-technique",
@@ -204,7 +204,7 @@ export const grades: Grade[] = [
     id: 7,
     title: "Grade 7 - Diploma Prep",
     description: "Pre-diploma level studies.",
-    color: "from-pink-500 to-fuchsia-600",
+    color: "from-gold to-gold-dark",
     modules: [
       {
         id: "g7-repertoire",
@@ -221,7 +221,7 @@ export const grades: Grade[] = [
     id: 8,
     title: "Grade 8 - Diploma",
     description: "Professional-level musicianship.",
-    color: "from-slate-600 to-slate-800",
+    color: "from-gold-dark to-gold",
     modules: [
       {
         id: "g8-mastery",
@@ -241,36 +241,30 @@ export const musicTheoryTopics = [
     id: "circle-of-fifths",
     title: "Circle of Fifths",
     description: "The master key to understanding key relationships",
-    icon: "🎯",
   },
   {
     id: "chord-progressions",
     title: "Chord Progressions",
     description: "How chords move and connect",
-    icon: "🔗",
   },
   {
     id: "scales-modes",
     title: "Scales & Modes",
     description: "Major, minor, and modal scales",
-    icon: "🎼",
   },
   {
     id: "rhythm-time",
     title: "Rhythm & Time",
     description: "Time signatures, tempo, and rhythm",
-    icon: "⏱️",
   },
   {
     id: "intervals",
     title: "Intervals",
     description: "The building blocks of melody and harmony",
-    icon: "📏",
   },
   {
     id: "harmony",
     title: "Harmony",
     description: "How notes work together",
-    icon: "🎵",
   },
 ];

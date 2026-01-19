@@ -3,6 +3,23 @@
 import { useState, useRef, useEffect } from "react";
 import { SheetMusicEditor } from "@/components/composer";
 import { useComposerStore, SheetNote } from "@/stores/composerStore";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  PenTool,
+  FileUp,
+  Trash2,
+  FileText,
+  Key,
+  Sparkles,
+  Loader2,
+  Check,
+  AlertCircle,
+  MousePointer,
+  MousePointerClick,
+  Play
+} from "lucide-react";
 
 export default function ComposePage() {
   const {
@@ -24,7 +41,6 @@ export default function ComposePage() {
   const [transcriptionResult, setTranscriptionResult] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load API key from localStorage on mount
   useEffect(() => {
     const storedKey = localStorage.getItem("claude-api-key");
     if (storedKey) {
@@ -32,7 +48,6 @@ export default function ComposePage() {
     }
   }, []);
 
-  // Save API key to localStorage when changed
   const handleApiKeyChange = (key: string) => {
     setApiKey(key);
     if (key) {
@@ -104,7 +119,6 @@ export default function ComposePage() {
         throw new Error(data.error || "Failed to transcribe");
       }
 
-      // Update composer state with transcribed data
       if (data.timeSignature) {
         setTimeSignature(data.timeSignature);
       }
@@ -115,12 +129,10 @@ export default function ComposePage() {
         setTempo(data.tempo);
       }
 
-      // Calculate how many measures we need
       if (data.notes && data.notes.length > 0) {
         const maxMeasure = Math.max(...data.notes.map((n: SheetNote) => n.measure));
         setMeasures(Math.max(4, maxMeasure + 2));
 
-        // Convert API notes to SheetNote format with IDs
         const notesWithIds: SheetNote[] = data.notes.map((n: Omit<SheetNote, "id">, i: number) => ({
           ...n,
           id: `transcribed-${i}`,
@@ -147,167 +159,189 @@ export default function ComposePage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Compose</h1>
-            <p className="text-gray-400">
+            <Badge variant="outline" className="mb-3 border-gold/30 text-gold">
+              <PenTool className="w-3 h-3 mr-1" />
+              Sheet Music Editor
+            </Badge>
+            <h1 className="font-serif text-4xl font-bold text-shadow-gold">Compose</h1>
+            <p className="text-muted-foreground mt-1">
               Create your own sheet music or transcribe from PDF
             </p>
           </div>
 
           <div className="flex gap-3">
-            <button
+            <Button
+              variant={showPdfUpload ? "default" : "secondary"}
               onClick={() => setShowPdfUpload(!showPdfUpload)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                showPdfUpload
-                  ? "bg-purple-600 text-white"
-                  : "bg-gray-800 hover:bg-gray-700"
-              }`}
+              className={showPdfUpload ? "gradient-gold text-black" : ""}
             >
-              <span className="mr-2">📄</span>
+              <FileUp className="w-4 h-4 mr-2" />
               Import PDF
-            </button>
+            </Button>
 
             {notes.length > 0 && (
-              <button
-                onClick={clearNotes}
-                className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-all"
-              >
+              <Button variant="secondary" onClick={clearNotes}>
+                <Trash2 className="w-4 h-4 mr-2" />
                 Clear All
-              </button>
+              </Button>
             )}
           </div>
         </div>
 
         {/* PDF Upload Panel */}
         {showPdfUpload && (
-          <div className="mb-8 bg-purple-900/20 border border-purple-700/50 rounded-2xl p-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span>🤖</span> AI Sheet Music Transcription
-            </h2>
-            <p className="text-gray-400 mb-6">
-              Upload a PDF of sheet music and Claude AI will transcribe it into editable notation.
-            </p>
+          <Card className="mb-8 bg-gradient-to-r from-gold/10 to-gold-dark/10 border-gold/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-gold" />
+                AI Sheet Music Transcription
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-muted-foreground">
+                Upload a PDF of sheet music and Claude AI will transcribe it into editable notation.
+              </p>
 
-            {/* API Key Input */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-gray-300">Claude API Key</label>
-                <button
-                  onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-                  className="text-sm text-purple-400 hover:text-purple-300"
-                >
-                  {showApiKeyInput ? "Hide" : apiKey ? "Change" : "Add Key"}
-                </button>
+              {/* API Key Input */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm text-muted-foreground">Claude API Key</label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                    className="text-gold hover:text-gold/80"
+                  >
+                    <Key className="w-3 h-3 mr-1" />
+                    {showApiKeyInput ? "Hide" : apiKey ? "Change" : "Add Key"}
+                  </Button>
+                </div>
+
+                {showApiKeyInput && (
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => handleApiKeyChange(e.target.value)}
+                    placeholder="sk-ant-api03-..."
+                    className="w-full bg-secondary border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-gold"
+                  />
+                )}
+
+                {apiKey && !showApiKeyInput && (
+                  <p className="text-sm text-gold flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    API key configured
+                  </p>
+                )}
               </div>
 
-              {showApiKeyInput && (
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => handleApiKeyChange(e.target.value)}
-                  placeholder="sk-ant-api03-..."
-                  className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-purple-500"
-                />
+              {/* Error message */}
+              {error && (
+                <Card className="bg-destructive/20 border-destructive/50">
+                  <CardContent className="p-3 flex items-center gap-2 text-destructive text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
+                  </CardContent>
+                </Card>
               )}
 
-              {apiKey && !showApiKeyInput && (
-                <p className="text-sm text-green-400">API key configured</p>
+              {/* Success message */}
+              {transcriptionResult && (
+                <Card className="bg-gold/10 border-gold/30">
+                  <CardContent className="p-3 flex items-center gap-2 text-gold text-sm">
+                    <Check className="w-4 h-4" />
+                    {transcriptionResult}
+                  </CardContent>
+                </Card>
               )}
-            </div>
 
-            {/* Error message */}
-            {error && (
-              <div className="mb-4 p-3 bg-red-900/30 border border-red-700/50 rounded-lg text-red-300 text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* Success message */}
-            {transcriptionResult && (
-              <div className="mb-4 p-3 bg-green-900/30 border border-green-700/50 rounded-lg text-green-300 text-sm">
-                {transcriptionResult}
-              </div>
-            )}
-
-            {!pdfFile ? (
-              <div
-                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                  dragActive
-                    ? "border-purple-500 bg-purple-500/10"
-                    : "border-gray-600 hover:border-gray-500"
-                }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-              >
-                <input
-                  ref={inputRef}
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  onChange={handleChange}
-                  className="hidden"
-                />
-
-                <div className="text-4xl mb-3">📄</div>
-                <p className="text-gray-300 mb-4">
-                  Drag and drop a PDF here, or click to browse
-                </p>
-
-                <button
-                  onClick={() => inputRef.current?.click()}
-                  className="px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium transition-colors"
+              {!pdfFile ? (
+                <Card
+                  className={`border-2 border-dashed transition-all ${
+                    dragActive
+                      ? "border-gold bg-gold/10"
+                      : "border-border hover:border-gold/50"
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
                 >
-                  Choose PDF
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between bg-gray-800/50 rounded-xl p-4">
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl">📄</span>
-                  <div>
-                    <h3 className="font-bold">{pdfFile.name}</h3>
-                    <p className="text-gray-400 text-sm">
-                      {(pdfFile.size / 1024).toFixed(1)} KB
+                  <CardContent className="p-8 text-center">
+                    <input
+                      ref={inputRef}
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      onChange={handleChange}
+                      className="hidden"
+                    />
+
+                    <FileText className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-muted-foreground mb-4">
+                      Drag and drop a PDF here, or click to browse
                     </p>
-                  </div>
-                </div>
 
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => {
-                      setPdfFile(null);
-                      setError(null);
-                    }}
-                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors"
-                  >
-                    Remove
-                  </button>
-                  <button
-                    onClick={handleTranscribe}
-                    disabled={isTranscribing}
-                    className="px-5 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg font-medium transition-colors flex items-center gap-2"
-                  >
-                    {isTranscribing ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Transcribing...
-                      </>
-                    ) : (
-                      <>
-                        <span>✨</span>
-                        Transcribe with AI
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
+                    <Button
+                      onClick={() => inputRef.current?.click()}
+                      className="gradient-gold text-black hover:opacity-90"
+                    >
+                      Choose PDF
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="bg-secondary/50">
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-gold/20 flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-gold" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold">{pdfFile.name}</h3>
+                        <p className="text-muted-foreground text-sm">
+                          {(pdfFile.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                    </div>
 
-            <p className="text-gray-500 text-sm mt-4">
-              Note: AI transcription works best with clear, high-quality PDFs of printed sheet music.
-              Your API key is stored locally and never sent to our servers.
-            </p>
-          </div>
+                    <div className="flex gap-3">
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setPdfFile(null);
+                          setError(null);
+                        }}
+                      >
+                        Remove
+                      </Button>
+                      <Button
+                        onClick={handleTranscribe}
+                        disabled={isTranscribing}
+                        className="gradient-gold text-black hover:opacity-90"
+                      >
+                        {isTranscribing ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Transcribing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Transcribe with AI
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <p className="text-muted-foreground text-sm">
+                Note: AI transcription works best with clear, high-quality PDFs of printed sheet music.
+                Your API key is stored locally and never sent to our servers.
+              </p>
+            </CardContent>
+          </Card>
         )}
 
         {/* Sheet Music Editor */}
@@ -315,34 +349,49 @@ export default function ComposePage() {
 
         {/* Instructions */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
-            <h4 className="font-bold mb-2 flex items-center gap-2">
-              <span>🖱️</span> Click to Add Notes
-            </h4>
-            <p className="text-gray-400 text-sm">
-              Click anywhere on the staff to add a note. The note will be placed
-              at the closest line or space.
-            </p>
-          </div>
+          <Card className="bg-card/50 border-border">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                  <MousePointer className="w-4 h-4 text-gold" />
+                </div>
+                <h4 className="font-bold">Click to Add Notes</h4>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Click anywhere on the staff to add a note. The note will be placed
+                at the closest line or space.
+              </p>
+            </CardContent>
+          </Card>
 
-          <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
-            <h4 className="font-bold mb-2 flex items-center gap-2">
-              <span>🗑️</span> Click Notes to Remove
-            </h4>
-            <p className="text-gray-400 text-sm">
-              Click on any existing note to remove it from the score.
-            </p>
-          </div>
+          <Card className="bg-card/50 border-border">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                  <MousePointerClick className="w-4 h-4 text-gold" />
+                </div>
+                <h4 className="font-bold">Click Notes to Remove</h4>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Click on any existing note to remove it from the score.
+              </p>
+            </CardContent>
+          </Card>
 
-          <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
-            <h4 className="font-bold mb-2 flex items-center gap-2">
-              <span>▶️</span> Play Your Composition
-            </h4>
-            <p className="text-gray-400 text-sm">
-              Use the play button to hear your composition. The playback will
-              highlight each note as it plays.
-            </p>
-          </div>
+          <Card className="bg-card/50 border-border">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                  <Play className="w-4 h-4 text-gold" />
+                </div>
+                <h4 className="font-bold">Play Your Composition</h4>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Use the play button to hear your composition. The playback will
+                highlight each note as it plays.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </main>

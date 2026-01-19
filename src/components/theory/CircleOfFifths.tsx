@@ -3,6 +3,10 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { playNoteForDuration, initAudio } from "@/lib/audio/synth";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Play } from "lucide-react";
 
 interface KeyInfo {
   major: string;
@@ -109,11 +113,11 @@ export function CircleOfFifths() {
               key={semitone}
               className={`relative w-10 h-28 rounded-b-lg border-x border-b flex flex-col items-center justify-end pb-2 transition-all duration-100 ${
                 isCurrentlyPlaying
-                  ? "bg-green-400 border-green-500 text-white"
+                  ? "bg-gold-light border-gold text-black shadow-glow-gold"
                   : isInScale
                   ? isRoot
-                    ? "bg-indigo-500 border-indigo-600 text-white"
-                    : "bg-indigo-200 border-indigo-300 text-indigo-800"
+                    ? "bg-gold border-gold-dark text-black"
+                    : "bg-gold-light border-gold text-black"
                   : "bg-gray-200 border-gray-300 text-gray-400"
               }`}
               animate={{ y: isCurrentlyPlaying ? 2 : 0 }}
@@ -133,9 +137,9 @@ export function CircleOfFifths() {
               key={semitone}
               className={`absolute top-0 w-6 h-16 rounded-b-lg z-10 transition-all duration-100 ${
                 isCurrentlyPlaying
-                  ? "bg-green-500"
+                  ? "bg-gold shadow-glow-gold"
                   : isInScale
-                  ? "bg-indigo-600"
+                  ? "bg-gold"
                   : "bg-gray-500"
               }`}
               style={{ left: position * 40 - 13 }}
@@ -166,7 +170,7 @@ export function CircleOfFifths() {
                   y1={getPosition(selectedIndex, 145).y}
                   x2={getPosition((selectedIndex + 1) % 12, 145).x}
                   y2={getPosition((selectedIndex + 1) % 12, 145).y}
-                  stroke="rgb(99 102 241)"
+                  stroke="#d4a853"
                   strokeWidth="2"
                   opacity="0.3"
                 />
@@ -175,7 +179,7 @@ export function CircleOfFifths() {
                   y1={getPosition(selectedIndex, 145).y}
                   x2={getPosition((selectedIndex + 11) % 12, 145).x}
                   y2={getPosition((selectedIndex + 11) % 12, 145).y}
-                  stroke="rgb(99 102 241)"
+                  stroke="#d4a853"
                   strokeWidth="2"
                   opacity="0.3"
                 />
@@ -196,10 +200,10 @@ export function CircleOfFifths() {
                 key={key.major}
                 className={`absolute w-14 h-14 rounded-full font-bold text-sm flex items-center justify-center transition-colors ${
                   isSelected
-                    ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/50"
+                    ? "bg-gold text-black shadow-lg shadow-gold/50"
                     : isAdjacent
-                    ? "bg-indigo-500/30 text-white border-2 border-indigo-500/50"
-                    : "bg-gray-700 hover:bg-gray-600 text-white"
+                    ? "bg-gold/30 text-foreground border-2 border-gold/50"
+                    : "bg-secondary hover:bg-secondary/80 text-foreground"
                 }`}
                 style={{
                   left: `calc(50% + ${pos.x}px - 28px)`,
@@ -224,8 +228,8 @@ export function CircleOfFifths() {
                 key={key.minor}
                 className={`absolute w-11 h-11 rounded-full font-medium text-xs flex items-center justify-center transition-colors ${
                   isSelected
-                    ? "bg-purple-500 text-white"
-                    : "bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-600"
+                    ? "bg-gold-dark text-black"
+                    : "bg-card hover:bg-card/80 text-muted-foreground border border-border"
                 }`}
                 style={{
                   left: `calc(50% + ${pos.x}px - 22px)`,
@@ -243,8 +247,8 @@ export function CircleOfFifths() {
           {/* Center display */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
-              <div className="text-xs text-gray-400">Selected</div>
-              <div className="text-2xl font-bold">{selectedKey.major}</div>
+              <div className="text-xs text-muted-foreground">Selected</div>
+              <div className="text-2xl font-bold text-gold">{selectedKey.major}</div>
             </div>
           </div>
         </div>
@@ -254,134 +258,142 @@ export function CircleOfFifths() {
           key={selectedIndex}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-gray-800/80 border border-gray-700 rounded-2xl p-6 w-full max-w-sm"
         >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-500 flex items-center justify-center text-3xl font-bold">
-              {selectedKey.major}
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold">{selectedKey.major} Major</h3>
-              <p className="text-gray-400">Relative: {selectedKey.minor}</p>
-            </div>
-          </div>
+          <Card className="bg-card/80 border-border w-full max-w-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-gold flex items-center justify-center text-3xl font-bold text-black">
+                  {selectedKey.major}
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold font-serif">{selectedKey.major} Major</h3>
+                  <p className="text-muted-foreground">Relative: {selectedKey.minor}</p>
+                </div>
+              </div>
 
-          <div className="space-y-4">
-            {/* Key signature */}
-            <div className="bg-gray-900/50 rounded-xl p-4">
-              <div className="text-sm text-gray-400 mb-2">Key Signature</div>
-              <div className="flex items-center gap-2">
-                {selectedKey.sharps > 0 ? (
-                  <div className="flex gap-1">
-                    {["F", "C", "G", "D", "A", "E", "B"].slice(0, selectedKey.sharps).map((n) => (
-                      <span key={n} className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-sm font-medium">
-                        {n}#
+              <div className="space-y-4">
+                {/* Key signature */}
+                <div className="bg-background/50 rounded-xl p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Key Signature</div>
+                  <div className="flex items-center gap-2">
+                    {selectedKey.sharps > 0 ? (
+                      <div className="flex gap-1 flex-wrap">
+                        {["F", "C", "G", "D", "A", "E", "B"].slice(0, selectedKey.sharps).map((n) => (
+                          <Badge key={n} variant="outline" className="bg-gold/20 text-gold border-gold/30">
+                            {n}#
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : selectedKey.flats > 0 ? (
+                      <div className="flex gap-1 flex-wrap">
+                        {["B", "E", "A", "D", "G", "C", "F"].slice(0, selectedKey.flats).map((n) => (
+                          <Badge key={n} variant="outline" className="bg-gold-dark/20 text-gold-dark border-gold-dark/30">
+                            {n}b
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">No sharps or flats</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Scale notes */}
+                <div className="bg-background/50 rounded-xl p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Scale Notes</div>
+                  <div className="flex gap-1 flex-wrap">
+                    {selectedKey.notes.map((note, i) => (
+                      <span
+                        key={i}
+                        className={`px-2 py-1 rounded text-sm font-medium ${
+                          i === 0 ? "bg-gold text-black" : "bg-secondary"
+                        }`}
+                      >
+                        {note}
                       </span>
                     ))}
                   </div>
-                ) : selectedKey.flats > 0 ? (
-                  <div className="flex gap-1">
-                    {["B", "E", "A", "D", "G", "C", "F"].slice(0, selectedKey.flats).map((n) => (
-                      <span key={n} className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-sm font-medium">
-                        {n}b
-                      </span>
-                    ))}
+                </div>
+
+                {/* Related keys */}
+                <div className="bg-background/50 rounded-xl p-4">
+                  <div className="text-sm text-muted-foreground mb-2">Related Keys</div>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <div className="text-muted-foreground text-xs">Fourth</div>
+                      <div className="font-medium">{KEYS[(selectedIndex + 11) % 12].major}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground text-xs">Fifth</div>
+                      <div className="font-medium">{KEYS[(selectedIndex + 1) % 12].major}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground text-xs">Relative</div>
+                      <div className="font-medium">{selectedKey.minor}</div>
+                    </div>
                   </div>
-                ) : (
-                  <span className="text-gray-300">No sharps or flats</span>
-                )}
-              </div>
-            </div>
-
-            {/* Scale notes */}
-            <div className="bg-gray-900/50 rounded-xl p-4">
-              <div className="text-sm text-gray-400 mb-2">Scale Notes</div>
-              <div className="flex gap-1">
-                {selectedKey.notes.map((note, i) => (
-                  <span
-                    key={i}
-                    className={`px-2 py-1 rounded text-sm font-medium ${
-                      i === 0 ? "bg-indigo-500 text-white" : "bg-gray-700"
-                    }`}
-                  >
-                    {note}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Related keys */}
-            <div className="bg-gray-900/50 rounded-xl p-4">
-              <div className="text-sm text-gray-400 mb-2">Related Keys</div>
-              <div className="grid grid-cols-3 gap-2 text-sm">
-                <div>
-                  <div className="text-gray-500 text-xs">Fourth</div>
-                  <div className="font-medium">{KEYS[(selectedIndex + 11) % 12].major}</div>
                 </div>
-                <div>
-                  <div className="text-gray-500 text-xs">Fifth</div>
-                  <div className="font-medium">{KEYS[(selectedIndex + 1) % 12].major}</div>
-                </div>
-                <div>
-                  <div className="text-gray-500 text-xs">Relative</div>
-                  <div className="font-medium">{selectedKey.minor}</div>
-                </div>
-              </div>
-            </div>
 
-            {/* Play button */}
-            <button
-              onClick={playScale}
-              disabled={isPlaying}
-              className={`w-full py-3 rounded-xl font-medium transition-colors ${
-                isPlaying ? "bg-green-500" : "bg-indigo-600 hover:bg-indigo-700"
-              } disabled:opacity-50`}
-            >
-              {isPlaying ? "Playing..." : `Play ${selectedKey.major} Major Scale`}
-            </button>
-          </div>
+                {/* Play button */}
+                <Button
+                  onClick={playScale}
+                  disabled={isPlaying}
+                  className={`w-full ${isPlaying ? "bg-gold-dark text-white" : "gradient-gold text-black hover:opacity-90"}`}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  {isPlaying ? "Playing..." : `Play ${selectedKey.major} Major Scale`}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
 
       {/* Keyboard visualization */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-6">
-        <h3 className="text-lg font-bold mb-4 text-center">{selectedKey.major} Major Scale on Keyboard</h3>
-        <div className="flex justify-center">
-          {renderKeyboard()}
-        </div>
-        <div className="flex justify-center gap-6 mt-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-indigo-500" />
-            <span className="text-gray-400">Root</span>
+      <Card className="bg-card/50 border-border">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-bold font-serif mb-4 text-center">{selectedKey.major} Major Scale on Keyboard</h3>
+          <div className="flex justify-center">
+            {renderKeyboard()}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-indigo-200" />
-            <span className="text-gray-400">Scale tones</span>
+          <div className="flex justify-center gap-6 mt-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-gold" />
+              <span className="text-muted-foreground">Root</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-gold-light" />
+              <span className="text-muted-foreground">Scale tones</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-gold-light shadow-glow-gold" />
+              <span className="text-muted-foreground">Playing</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-green-400" />
-            <span className="text-gray-400">Playing</span>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Educational content */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
-          <h4 className="font-bold mb-2">Moving Around the Circle</h4>
-          <p className="text-gray-400 text-sm">
-            Moving clockwise (C → G → D) adds one sharp each time. Moving counter-clockwise
-            (C → F → Bb) adds one flat. Adjacent keys share 6 of their 7 notes, making
-            them harmonically related.
-          </p>
-        </div>
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
-          <h4 className="font-bold mb-2">Relative Major/Minor</h4>
-          <p className="text-gray-400 text-sm">
-            The inner circle shows relative minor keys. A minor and C major share the same notes
-            but start on different roots. The relative minor is always 3 semitones below the major.
-          </p>
-        </div>
+        <Card className="bg-card/50 border-border">
+          <CardContent className="p-5">
+            <h4 className="font-bold font-serif mb-2">Moving Around the Circle</h4>
+            <p className="text-muted-foreground text-sm">
+              Moving clockwise (C → G → D) adds one sharp each time. Moving counter-clockwise
+              (C → F → Bb) adds one flat. Adjacent keys share 6 of their 7 notes, making
+              them harmonically related.
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-card/50 border-border">
+          <CardContent className="p-5">
+            <h4 className="font-bold font-serif mb-2">Relative Major/Minor</h4>
+            <p className="text-muted-foreground text-sm">
+              The inner circle shows relative minor keys. A minor and C major share the same notes
+              but start on different roots. The relative minor is always 3 semitones below the major.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

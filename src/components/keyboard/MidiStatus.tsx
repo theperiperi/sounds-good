@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { initMidi, getConnectedDevices, onMidiStateChange } from "@/lib/midi/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Loader2, WifiOff, Keyboard, AlertCircle } from "lucide-react";
 
 export function MidiStatus() {
   const [status, setStatus] = useState<"loading" | "connected" | "no-devices" | "unsupported">("loading");
@@ -22,7 +30,6 @@ export function MidiStatus() {
 
     init();
 
-    // Listen for device changes
     const unsubscribe = onMidiStateChange(() => {
       const currentDevices = getConnectedDevices();
       setDevices(currentDevices);
@@ -33,21 +40,64 @@ export function MidiStatus() {
   }, []);
 
   if (status === "loading") {
-    return <span className="text-gray-500 text-sm">Checking MIDI...</span>;
+    return (
+      <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
+        <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+        Checking MIDI...
+      </Badge>
+    );
   }
 
   if (status === "unsupported") {
-    return <span className="text-gray-500 text-sm">MIDI not supported</span>;
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
+              <AlertCircle className="w-3 h-3 mr-1.5" />
+              MIDI not supported
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Your browser doesn&apos;t support Web MIDI API</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
   }
 
   if (status === "no-devices") {
-    return <span className="text-yellow-500 text-sm">No MIDI device</span>;
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Badge variant="outline" className="border-yellow-500/30 text-yellow-500">
+              <WifiOff className="w-3 h-3 mr-1.5" />
+              No MIDI device
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Connect a MIDI keyboard for the best experience</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
   }
 
   return (
-    <span className="text-green-500 text-sm flex items-center gap-2">
-      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-      {devices[0]}
-    </span>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge variant="outline" className="border-gold/30 text-gold">
+            <span className="w-2 h-2 bg-gold rounded-full animate-pulse mr-1.5" />
+            <Keyboard className="w-3 h-3 mr-1.5" />
+            {devices[0]}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>MIDI device connected and ready</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
