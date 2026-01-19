@@ -1,6 +1,11 @@
 # Sounds Good
 
-A music education and composition web application for learning piano and music theory.
+A music education and composition web application for music theory and interactive piano learning with MIDI play alongs.
+
+<img width="952" height="785" alt="Screenshot 2026-01-19 at 4 16 44 PM" src="https://github.com/user-attachments/assets/264788c2-8ee8-4eab-87bf-7c3d8ab8510f" />
+<img width="949" height="710" alt="Screenshot 2026-01-19 at 4 17 32 PM" src="https://github.com/user-attachments/assets/550cd597-b432-4e6f-8768-7e84cd0c83aa" />
+<img width="898" height="393" alt="Screenshot 2026-01-19 at 4 17 06 PM" src="https://github.com/user-attachments/assets/f2b07eb5-8433-4072-9c6e-058a0e124531" />
+
 
 ## Features
 
@@ -53,7 +58,7 @@ npm start
 
 - **White keys**: A, S, D, F, G, H, J, K, L
 - **Black keys**: W, E, T, Y, U, O, P
-- **MIDI**: Connect a MIDI keyboard for the full experience
+- **MIDI**: Connect a MIDI keyboard to access the full immersive experience
 
 ## License
 
