@@ -15,6 +15,32 @@ export async function initAudio(): Promise<void> {
 
   await Tone.start();
 
+  // Add subtle compression for consistent dynamics
+  const compressor = new Tone.Compressor({
+    threshold: -20,
+    ratio: 3,
+    attack: 0.01,
+    release: 0.1,
+  });
+
+  // Add EQ for brightness
+  const eq = new Tone.EQ3({
+    low: 0,              // Neutral lows
+    mid: 0,
+    high: 3,             // Boost highs for clarity
+    lowFrequency: 250,
+    highFrequency: 3000,
+  });
+
+  // Add a small room reverb for natural space
+  const reverb = new Tone.Reverb({
+    decay: 1.0,
+    wet: 0.15,           // Subtle reverb
+  }).toDestination();
+
+  // Wait for reverb to be ready
+  await reverb.ready;
+
   // Create a bright, clear piano-like sound
   synth = new Tone.PolySynth(Tone.Synth, {
     oscillator: {
@@ -28,38 +54,13 @@ export async function initAudio(): Promise<void> {
       sustain: 0.2,       // Lower sustain for clarity
       release: 1.2,       // Natural release tail
     },
-  }).toDestination();
+  });
 
   // Set volume
   synth.volume.value = -6;
 
-  // Add EQ for brightness
-  const eq = new Tone.EQ3({
-    low: -2,
-    mid: 0,
-    high: 3,             // Boost highs for clarity
-    lowFrequency: 250,
-    highFrequency: 3000,
-  }).toDestination();
-
-  // Add subtle compression for consistent dynamics
-  const compressor = new Tone.Compressor({
-    threshold: -20,
-    ratio: 3,
-    attack: 0.01,
-    release: 0.1,
-  }).toDestination();
-
-  // Add a small room reverb for natural space
-  const reverb = new Tone.Reverb({
-    decay: 1.0,
-    wet: 0.15,           // Subtle reverb
-  }).toDestination();
-
   // Signal chain: synth -> compressor -> eq -> reverb -> output
-  synth.connect(compressor);
-  compressor.connect(eq);
-  eq.connect(reverb);
+  synth.chain(compressor, eq, reverb);
 
   isInitialized = true;
 }
