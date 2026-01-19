@@ -4,6 +4,9 @@ import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useComposerStore, SheetNote } from "@/stores/composerStore";
 import { initAudio, playNoteForDuration } from "@/lib/audio/synth";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Play, Trash2, Minus, Plus } from "lucide-react";
 
 // Staff configuration
 const STAFF_LINE_SPACING = 10;
@@ -388,8 +391,8 @@ export function SheetMusicEditor() {
             cy={y}
             rx={NOTE_RADIUS + 2}
             ry={NOTE_RADIUS}
-            fill={isCurrentlyPlaying ? "#22c55e" : filled ? "#818cf8" : "none"}
-            stroke={isCurrentlyPlaying ? "#22c55e" : "#818cf8"}
+            fill={isCurrentlyPlaying ? "#22c55e" : filled ? "#d4a853" : "none"}
+            stroke={isCurrentlyPlaying ? "#22c55e" : "#d4a853"}
             strokeWidth="2"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -406,7 +409,7 @@ export function SheetMusicEditor() {
               y1={y}
               x2={x + NOTE_RADIUS + 1}
               y2={y - 30}
-              stroke={isCurrentlyPlaying ? "#22c55e" : "#818cf8"}
+              stroke={isCurrentlyPlaying ? "#22c55e" : "#d4a853"}
               strokeWidth="2"
             />
           )}
@@ -415,7 +418,7 @@ export function SheetMusicEditor() {
             <path
               d={`M${x + NOTE_RADIUS + 1} ${y - 30} Q${x + 20} ${y - 20} ${x + 10} ${y - 10}`}
               fill="none"
-              stroke={isCurrentlyPlaying ? "#22c55e" : "#818cf8"}
+              stroke={isCurrentlyPlaying ? "#22c55e" : "#d4a853"}
               strokeWidth="2"
             />
           )}
@@ -448,91 +451,99 @@ export function SheetMusicEditor() {
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-gray-800/50 border border-gray-700 rounded-xl p-4">
-        {/* Time signature */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Time:</span>
-          <select
-            value={`${timeSignature[0]}/${timeSignature[1]}`}
-            onChange={(e) => {
-              const [top, bottom] = e.target.value.split("/").map(Number);
-              setTimeSignature([top, bottom]);
-            }}
-            className="bg-gray-700 rounded px-3 py-1.5 text-sm"
-          >
-            {TIME_SIGNATURES.map(([t, b]) => (
-              <option key={`${t}/${b}`} value={`${t}/${b}`}>
-                {t}/{b}
-              </option>
-            ))}
-          </select>
-        </div>
+      <Card className="bg-card/50 border-border">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-4 items-center justify-between">
+            {/* Time signature */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground font-medium">Time:</span>
+              <select
+                value={`${timeSignature[0]}/${timeSignature[1]}`}
+                onChange={(e) => {
+                  const [top, bottom] = e.target.value.split("/").map(Number);
+                  setTimeSignature([top, bottom]);
+                }}
+                className="bg-secondary rounded px-3 py-1.5 text-sm border-0"
+              >
+                {TIME_SIGNATURES.map(([t, b]) => (
+                  <option key={`${t}/${b}`} value={`${t}/${b}`}>
+                    {t}/{b}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* Key signature */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Key:</span>
-          <select
-            value={keySignature}
-            onChange={(e) => setKeySignature(Number(e.target.value))}
-            className="bg-gray-700 rounded px-3 py-1.5 text-sm"
-          >
-            {KEY_SIGNATURES.map((ks) => (
-              <option key={ks.value} value={ks.value}>
-                {ks.name}
-              </option>
-            ))}
-          </select>
-        </div>
+            {/* Key signature */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground font-medium">Key:</span>
+              <select
+                value={keySignature}
+                onChange={(e) => setKeySignature(Number(e.target.value))}
+                className="bg-secondary rounded px-3 py-1.5 text-sm border-0"
+              >
+                {KEY_SIGNATURES.map((ks) => (
+                  <option key={ks.value} value={ks.value}>
+                    {ks.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* Tempo */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Tempo:</span>
-          <button
-            onClick={() => setTempo(tempo - 10)}
-            className="w-8 h-8 bg-gray-700 rounded hover:bg-gray-600"
-          >
-            -
-          </button>
-          <span className="w-12 text-center">{tempo}</span>
-          <button
-            onClick={() => setTempo(tempo + 10)}
-            className="w-8 h-8 bg-gray-700 rounded hover:bg-gray-600"
-          >
-            +
-          </button>
-        </div>
+            {/* Tempo */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground font-medium">Tempo:</span>
+              <div className="flex items-center bg-secondary rounded-lg p-1">
+                <button
+                  onClick={() => setTempo(tempo - 10)}
+                  className="w-8 h-8 rounded-md hover:bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="w-12 text-center font-bold text-gold">{tempo}</span>
+                <button
+                  onClick={() => setTempo(tempo + 10)}
+                  className="w-8 h-8 rounded-md hover:bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-        {/* Measures */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Measures:</span>
-          <button
-            onClick={() => setMeasures(measures - 1)}
-            className="w-8 h-8 bg-gray-700 rounded hover:bg-gray-600"
-          >
-            -
-          </button>
-          <span className="w-8 text-center">{measures}</span>
-          <button
-            onClick={() => setMeasures(measures + 1)}
-            className="w-8 h-8 bg-gray-700 rounded hover:bg-gray-600"
-          >
-            +
-          </button>
-        </div>
-      </div>
+            {/* Measures */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground font-medium">Measures:</span>
+              <div className="flex items-center bg-secondary rounded-lg p-1">
+                <button
+                  onClick={() => setMeasures(measures - 1)}
+                  className="w-8 h-8 rounded-md hover:bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="w-8 text-center font-medium">{measures}</span>
+                <button
+                  onClick={() => setMeasures(measures + 1)}
+                  className="w-8 h-8 rounded-md hover:bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Note duration selector */}
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-400">Note value:</span>
+        <span className="text-sm text-muted-foreground font-medium">Note value:</span>
         <div className="flex gap-2">
           {DURATIONS.map((d) => (
             <button
               key={d.value}
               onClick={() => setSelectedDuration(d.value)}
-              className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+              className={`px-3 py-2 rounded-lg text-sm transition-all ${
                 selectedDuration === d.value
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-800 hover:bg-gray-700"
+                  ? "gradient-gold text-black shadow-lg"
+                  : "bg-secondary hover:bg-secondary/80"
               }`}
             >
               {d.name}
@@ -542,7 +553,8 @@ export function SheetMusicEditor() {
       </div>
 
       {/* Staff canvas */}
-      <div className="bg-gray-900 rounded-xl p-4 overflow-x-auto">
+      <Card className="bg-card/80 border-border overflow-x-auto">
+        <CardContent className="p-4">
         <svg
           ref={svgRef}
           width={totalWidth}
@@ -565,47 +577,50 @@ export function SheetMusicEditor() {
               cy={hoveredPosition.y}
               rx={NOTE_RADIUS + 2}
               ry={NOTE_RADIUS}
-              fill="#818cf8"
+              fill="#d4a853"
               opacity="0.4"
             />
           )}
         </svg>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Action buttons */}
       <div className="flex gap-4">
-        <button
+        <Button
           onClick={playComposition}
           disabled={isPlaying || notes.length === 0}
-          className={`px-6 py-3 rounded-xl font-bold transition-colors ${
-            isPlaying ? "bg-green-500" : "bg-indigo-600 hover:bg-indigo-700"
-          } disabled:opacity-50`}
+          className={`${isPlaying ? "bg-gold-dark text-white" : "gradient-gold text-black hover:opacity-90"}`}
         >
+          <Play className="w-4 h-4 mr-2" />
           {isPlaying ? "Playing..." : "Play"}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={clearNotes}
           disabled={isPlaying || notes.length === 0}
-          className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold transition-colors disabled:opacity-50"
+          variant="secondary"
         >
+          <Trash2 className="w-4 h-4 mr-2" />
           Clear
-        </button>
+        </Button>
       </div>
 
       {/* Instructions */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4">
-        <h4 className="font-bold mb-2">How to use</h4>
-        <ul className="text-gray-400 text-sm space-y-1">
-          <li>• Click on the staff to add notes</li>
-          <li>• Click on an existing note to remove it</li>
-          <li>• Select a note duration before placing notes</li>
-          <li>• Use the controls to change time signature, key, tempo, and number of measures</li>
-          <li>• Press Play to hear your composition</li>
-        </ul>
-      </div>
+      <Card className="bg-card/50 border-border">
+        <CardContent className="p-4">
+          <h4 className="font-bold font-serif mb-2">How to use</h4>
+          <ul className="text-muted-foreground text-sm space-y-1">
+            <li>• Click on the staff to add notes</li>
+            <li>• Click on an existing note to remove it</li>
+            <li>• Select a note duration before placing notes</li>
+            <li>• Use the controls to change time signature, key, tempo, and number of measures</li>
+            <li>• Press Play to hear your composition</li>
+          </ul>
+        </CardContent>
+      </Card>
 
       {/* Note count */}
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-muted-foreground">
         {notes.length} note{notes.length !== 1 ? "s" : ""} placed
       </div>
     </div>

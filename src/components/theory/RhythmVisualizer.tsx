@@ -2,6 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Play, Square, Minus, Plus } from "lucide-react";
 
 interface NoteValue {
   name: string;
@@ -94,12 +98,16 @@ export function RhythmVisualizer() {
   const [tempo, setTempo] = useState(100);
   const [selectedNote, setSelectedNote] = useState<NoteValue | null>(null);
   const audioRef = useRef<AudioContext | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize audio
   useEffect(() => {
     audioRef.current = new AudioContext();
     return () => {
       audioRef.current?.close();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, []);
 
@@ -126,21 +134,29 @@ export function RhythmVisualizer() {
 
     const beatDuration = 60000 / tempo;
     let beat = 0;
-    const totalBeats = selectedTime.top * 2; // Play 2 bars
 
-    const interval = setInterval(() => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    // Play continuously until stopped
+    intervalRef.current = setInterval(() => {
       const beatInMeasure = beat % selectedTime.top;
       setCurrentBeat(beatInMeasure);
       playClick(beatInMeasure === 0);
-
       beat++;
-      if (beat >= totalBeats) {
-        clearInterval(interval);
-        setIsPlaying(false);
-        setCurrentBeat(null);
-      }
     }, beatDuration);
   }, [isPlaying, tempo, selectedTime, playClick]);
+
+  const stopMetronome = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setIsPlaying(false);
+    setCurrentBeat(null);
+  }, []);
 
   // Play a note value demonstration
   const playNoteDemo = useCallback((note: NoteValue) => {
@@ -179,11 +195,11 @@ export function RhythmVisualizer() {
             className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg ${
               currentBeat === beat
                 ? beat === 0
-                  ? "bg-indigo-500 text-white"
-                  : "bg-indigo-400 text-white"
+                  ? "bg-gold text-black"
+                  : "bg-gold-light text-black"
                 : beat === 0
-                ? "bg-gray-600 text-white"
-                : "bg-gray-700 text-gray-300"
+                ? "bg-secondary text-foreground"
+                : "bg-secondary/50 text-muted-foreground"
             }`}
             animate={{
               scale: currentBeat === beat ? 1.1 : 1,
@@ -205,12 +221,12 @@ export function RhythmVisualizer() {
           <motion.button
             key={note.name}
             onClick={() => playNoteDemo(note)}
-            className={`bg-gray-800 rounded-xl p-4 text-center transition-all hover:bg-gray-700 ${
-              selectedNote?.name === note.name ? "ring-2 ring-indigo-500 bg-indigo-500/20" : ""
+            className={`bg-secondary rounded-xl p-4 text-center transition-all hover:bg-secondary/80 ${
+              selectedNote?.name === note.name ? "ring-2 ring-gold bg-gold/20" : ""
             }`}
             whileTap={{ scale: 0.95 }}
           >
-            <div className={`text-white ${selectedNote?.name === note.name ? "text-indigo-400" : ""}`}>
+            <div className={`text-foreground ${selectedNote?.name === note.name ? "text-gold" : ""}`}>
               <NoteSVG
                 filled={note.filled}
                 hasStem={note.hasStem}
@@ -219,13 +235,13 @@ export function RhythmVisualizer() {
               />
             </div>
             <div className="font-bold text-sm mt-2">{note.name}</div>
-            <div className="text-gray-400 text-xs mt-1">
+            <div className="text-muted-foreground text-xs mt-1">
               {note.beats} beat{note.beats !== 1 ? "s" : ""}
             </div>
             {/* Visual duration bar */}
             <div className="mt-3 flex justify-center">
               <motion.div
-                className="h-2 bg-indigo-500 rounded-full"
+                className="h-2 bg-gold rounded-full"
                 initial={{ width: 0 }}
                 animate={{
                   width: selectedNote?.name === note.name ? `${note.beats * 25}px` : `${note.beats * 25}px`,
@@ -238,7 +254,7 @@ export function RhythmVisualizer() {
                 style={{ width: `${note.beats * 25}px` }}
               />
             </div>
-            <div className="text-xs text-gray-500 mt-2">Click to hear</div>
+            <div className="text-xs text-muted-foreground mt-2">Click to hear</div>
           </motion.button>
         ))}
       </div>
@@ -250,7 +266,7 @@ export function RhythmVisualizer() {
     const lines = [0, 1, 2, 3, 4];
 
     return (
-      <div className="relative bg-gray-900 rounded-xl p-6 overflow-hidden">
+      <div className="relative bg-card/80 border border-border rounded-xl p-6 overflow-hidden">
         <svg className="w-full h-32" viewBox="0 0 400 80">
           {/* Staff lines */}
           {lines.map((line) => (
@@ -306,7 +322,7 @@ export function RhythmVisualizer() {
                 cy={40}
                 rx="8"
                 ry="6"
-                fill={isPlaying ? "#818cf8" : "white"}
+                fill={isPlaying ? "#d4a853" : "white"}
                 className="transition-all duration-100"
               />
               {/* Stem */}
@@ -315,7 +331,7 @@ export function RhythmVisualizer() {
                 y1={40}
                 x2={x + 7}
                 y2={12}
-                stroke={isPlaying ? "#818cf8" : "white"}
+                stroke={isPlaying ? "#d4a853" : "white"}
                 strokeWidth="2"
                 className="transition-all duration-100"
               />
@@ -323,7 +339,7 @@ export function RhythmVisualizer() {
               <text
                 x={x}
                 y="78"
-                fill={isPlaying ? "#818cf8" : isAccent ? "#9ca3af" : "#6b7280"}
+                fill={isPlaying ? "#d4a853" : isAccent ? "#9ca3af" : "#6b7280"}
                 fontSize="10"
                 textAnchor="middle"
                 fontWeight={isAccent ? "bold" : "normal"}
@@ -347,8 +363,8 @@ export function RhythmVisualizer() {
             onClick={() => setSelectedTime(ts)}
             className={`p-4 rounded-xl text-center transition-all ${
               selectedTime.name === ts.name
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-800 hover:bg-gray-700"
+                ? "gradient-gold text-black shadow-lg"
+                : "bg-secondary hover:bg-secondary/80"
             }`}
           >
             <div className="text-3xl font-bold font-serif">
@@ -364,51 +380,64 @@ export function RhythmVisualizer() {
       {renderStaff()}
 
       {/* Beat visualization with metronome */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="text-lg font-bold mb-3">Beat Pattern</h3>
-            {renderMeasure()}
-          </div>
-
-          <div className="flex items-center gap-6">
-            {/* Tempo control */}
-            <div className="text-center">
-              <div className="text-sm text-gray-400 mb-2">Tempo</div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setTempo((t) => Math.max(40, t - 10))}
-                  className="w-8 h-8 bg-gray-700 rounded-lg hover:bg-gray-600"
-                >
-                  -
-                </button>
-                <span className="w-16 text-center font-bold text-xl">{tempo}</span>
-                <button
-                  onClick={() => setTempo((t) => Math.min(200, t + 10))}
-                  className="w-8 h-8 bg-gray-700 rounded-lg hover:bg-gray-600"
-                >
-                  +
-                </button>
-              </div>
-              <div className="text-xs text-gray-500 mt-1">BPM</div>
+      <Card className="bg-card/50 border-border">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="text-lg font-bold font-serif mb-3">Beat Pattern</h3>
+              {renderMeasure()}
             </div>
 
-            {/* Play button */}
-            <button
-              onClick={playMetronome}
-              disabled={isPlaying}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-xl font-bold transition-colors"
-            >
-              {isPlaying ? "Playing..." : "Play Beats"}
-            </button>
+            <div className="flex items-center gap-6">
+              {/* Tempo control */}
+              <div className="text-center">
+                <div className="text-sm text-muted-foreground mb-2">Tempo</div>
+                <div className="flex items-center bg-secondary rounded-lg p-1">
+                  <button
+                    onClick={() => setTempo((t) => Math.max(40, t - 10))}
+                    className="w-8 h-8 rounded-md hover:bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-16 text-center font-bold text-gold">{tempo}</span>
+                  <button
+                    onClick={() => setTempo((t) => Math.min(200, t + 10))}
+                    className="w-8 h-8 rounded-md hover:bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">BPM</div>
+              </div>
+
+              {/* Play/Stop button */}
+              {isPlaying ? (
+                <Button
+                  onClick={stopMetronome}
+                  variant="secondary"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Square className="w-4 h-4 mr-2" />
+                  Stop
+                </Button>
+              ) : (
+                <Button
+                  onClick={playMetronome}
+                  className="gradient-gold text-black hover:opacity-90"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Play Beats
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Note values */}
       <div>
-        <h3 className="text-lg font-bold mb-4">Note Values</h3>
-        <p className="text-gray-400 text-sm mb-4">Click any note to hear its duration at the current tempo.</p>
+        <h3 className="text-lg font-bold font-serif mb-4">Note Values</h3>
+        <p className="text-muted-foreground text-sm mb-4">Click any note to hear its duration at the current tempo.</p>
         {renderNoteValues()}
       </div>
 
@@ -417,44 +446,51 @@ export function RhythmVisualizer() {
         key={selectedTime.name}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-indigo-600 rounded-2xl p-6 text-white"
       >
-        <div className="flex items-start gap-4">
-          <div className="text-4xl font-bold font-serif">
-            <span className="block">{selectedTime.top}</span>
-            <span className="block border-t-2 border-white">{selectedTime.bottom}</span>
-          </div>
-          <div>
-            <h3 className="text-xl font-bold">{selectedTime.name}</h3>
-            <p className="text-white/80 mt-1">{selectedTime.feel}</p>
-            <div className="flex gap-2 mt-3">
-              {selectedTime.examples.map((ex, i) => (
-                <span key={i} className="px-2 py-1 bg-white/20 rounded text-sm">
-                  {ex}
-                </span>
-              ))}
+        <Card className="gradient-gold text-black">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl font-bold font-serif">
+                <span className="block">{selectedTime.top}</span>
+                <span className="block border-t-2 border-black">{selectedTime.bottom}</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold font-serif">{selectedTime.name}</h3>
+                <p className="text-black/70 mt-1">{selectedTime.feel}</p>
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {selectedTime.examples.map((ex, i) => (
+                    <Badge key={i} variant="outline" className="bg-black/10 border-black/20 text-black">
+                      {ex}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* Educational content */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
-          <h4 className="font-bold mb-2">Understanding Time Signatures</h4>
-          <p className="text-gray-400 text-sm">
-            The <strong className="text-white">top number</strong> tells you how many beats are in each measure.
-            The <strong className="text-white">bottom number</strong> tells you which note value gets one beat
-            (4 = quarter note, 8 = eighth note).
-          </p>
-        </div>
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-5">
-          <h4 className="font-bold mb-2">Counting Rhythms</h4>
-          <p className="text-gray-400 text-sm">
-            In 4/4 time, count &quot;1, 2, 3, 4&quot; for each measure. For eighth notes, add &quot;&amp;&quot; between:
-            &quot;1 &amp; 2 &amp; 3 &amp; 4 &amp;&quot;. For sixteenths: &quot;1 e &amp; a 2 e &amp; a...&quot;
-          </p>
-        </div>
+        <Card className="bg-card/50 border-border">
+          <CardContent className="p-5">
+            <h4 className="font-bold font-serif mb-2">Understanding Time Signatures</h4>
+            <p className="text-muted-foreground text-sm">
+              The <strong className="text-gold">top number</strong> tells you how many beats are in each measure.
+              The <strong className="text-gold">bottom number</strong> tells you which note value gets one beat
+              (4 = quarter note, 8 = eighth note).
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-card/50 border-border">
+          <CardContent className="p-5">
+            <h4 className="font-bold font-serif mb-2">Counting Rhythms</h4>
+            <p className="text-muted-foreground text-sm">
+              In 4/4 time, count &quot;1, 2, 3, 4&quot; for each measure. For eighth notes, add &quot;&amp;&quot; between:
+              &quot;1 &amp; 2 &amp; 3 &amp; 4 &amp;&quot;. For sixteenths: &quot;1 e &amp; a 2 e &amp; a...&quot;
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -1,22 +1,31 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { StepLearner } from "@/components/player";
 import { useSongStore } from "@/stores/songStore";
-import { parseMidiFile, ParsedSong } from "@/lib/midi/parser";
+import { parseMidiFile } from "@/lib/midi/parser";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowLeft,
+  Upload,
+  Piano,
+  Loader2,
+  PartyPopper,
+  RotateCcw,
+  Music
+} from "lucide-react";
 
 export default function PlayLearnPage() {
-  const router = useRouter();
   const { song, setSong } = useSongStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [completed, setCompleted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle file upload
   const handleFileUpload = useCallback(
     async (file: File) => {
       if (!file.name.match(/\.(mid|midi)$/i)) {
@@ -42,7 +51,6 @@ export default function PlayLearnPage() {
     [setSong]
   );
 
-  // Handle drag and drop
   const [dragActive, setDragActive] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -75,79 +83,83 @@ export default function PlayLearnPage() {
     setCompleted(true);
   };
 
-  // If no song loaded, show upload interface
   if (!song) {
     return (
       <main className="min-h-[calc(100vh-4rem)] p-8">
         <div className="max-w-4xl mx-auto">
-          {/* Back link */}
           <Link
             href="/play"
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
           >
-            <span>←</span> Back to Play Songs
+            <ArrowLeft className="w-4 h-4" />
+            Back to Play Songs
           </Link>
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Learn a Song</h1>
-            <p className="text-gray-400">
+            <h1 className="font-serif text-3xl font-bold mb-2">Learn a Song</h1>
+            <p className="text-muted-foreground">
               Upload a MIDI file to start learning
             </p>
           </div>
 
-          {/* Upload area */}
-          <div
-            className={`relative border-2 border-dashed rounded-2xl p-16 text-center transition-all ${
+          <Card
+            className={`border-2 border-dashed transition-all ${
               dragActive
-                ? "border-indigo-500 bg-indigo-500/10"
-                : "border-gray-700 hover:border-gray-600"
+                ? "border-gold bg-gold/10"
+                : "border-border hover:border-gold/30 bg-card/50"
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".mid,.midi"
-              onChange={handleInputChange}
-              className="hidden"
-            />
+            <CardContent className="p-16 text-center">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".mid,.midi"
+                onChange={handleInputChange}
+                className="hidden"
+              />
 
-            {isLoading ? (
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-gray-400">Parsing MIDI file...</p>
-              </div>
-            ) : (
-              <>
-                <div className="text-6xl mb-4">🎹</div>
-                <h2 className="text-xl font-bold mb-2">Drop MIDI File Here</h2>
-                <p className="text-gray-400 mb-6">
-                  or click the button below to browse
-                </p>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-medium transition-colors"
-                >
-                  Choose File
-                </button>
-              </>
-            )}
+              {isLoading ? (
+                <div className="flex flex-col items-center gap-4">
+                  <Loader2 className="w-12 h-12 text-gold animate-spin" />
+                  <p className="text-muted-foreground">Parsing MIDI file...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-secondary flex items-center justify-center">
+                    <Piano className="w-10 h-10 text-gold" />
+                  </div>
+                  <h2 className="font-serif text-xl font-bold mb-2">Drop MIDI File Here</h2>
+                  <p className="text-muted-foreground mb-6">
+                    or click the button below to browse
+                  </p>
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="gradient-gold text-black hover:opacity-90"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose File
+                  </Button>
+                </>
+              )}
 
-            {error && (
-              <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
-                {error}
-              </div>
-            )}
-          </div>
+              {error && (
+                <Card className="mt-4 bg-destructive/20 border-destructive/50">
+                  <CardContent className="p-4 text-destructive">
+                    {error}
+                  </CardContent>
+                </Card>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </main>
     );
   }
 
-  // Song is loaded - show learning interface
   return (
     <main className="min-h-[calc(100vh-4rem)] p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
@@ -156,26 +168,30 @@ export default function PlayLearnPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/play"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              ← Back
+              <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold">{song.name}</h1>
-              <p className="text-gray-400 text-sm">
-                {song.tempo} BPM • {song.timeSignature[0]}/{song.timeSignature[1]} •
-                {song.tracks.left.length} left hand notes •
-                {song.tracks.right.length} right hand notes
-              </p>
+              <h1 className="font-serif text-2xl font-bold">{song.name}</h1>
+              <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                <Badge variant="outline" className="border-gold/30 text-gold">
+                  {Math.round(song.tempo)} BPM
+                </Badge>
+                <span>{song.timeSignature[0]}/{song.timeSignature[1]}</span>
+                <span>{song.tracks.left.length} LH notes</span>
+                <span>{song.tracks.right.length} RH notes</span>
+              </div>
             </div>
           </div>
 
-          <button
+          <Button
+            variant="secondary"
             onClick={() => fileInputRef.current?.click()}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors"
           >
+            <Music className="w-4 h-4 mr-2" />
             Load Different Song
-          </button>
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
@@ -192,32 +208,35 @@ export default function PlayLearnPage() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="mb-6 p-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 rounded-2xl text-center"
             >
-              <div className="text-4xl mb-2">🎉</div>
-              <h2 className="text-2xl font-bold text-green-400 mb-2">
-                Congratulations!
-              </h2>
-              <p className="text-gray-300 mb-4">
-                You&apos;ve completed learning this piece!
-              </p>
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => {
-                    useSongStore.getState().reset();
-                    setCompleted(false);
-                  }}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition-colors"
-                >
-                  Practice Again
-                </button>
-                <Link
-                  href="/play"
-                  className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors"
-                >
-                  Choose Another Song
-                </Link>
-              </div>
+              <Card className="mb-6 bg-gradient-to-r from-gold/20 to-gold-dark/20 border-gold/50">
+                <CardContent className="p-6 text-center">
+                  <PartyPopper className="w-12 h-12 mx-auto mb-2 text-gold" />
+                  <h2 className="font-serif text-2xl font-bold text-gold mb-2">
+                    Congratulations!
+                  </h2>
+                  <p className="text-muted-foreground mb-4">
+                    You&apos;ve completed learning this piece!
+                  </p>
+                  <div className="flex justify-center gap-4">
+                    <Button
+                      onClick={() => {
+                        useSongStore.getState().reset();
+                        setCompleted(false);
+                      }}
+                      className="gradient-gold text-black hover:opacity-90"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Practice Again
+                    </Button>
+                    <Button variant="secondary" asChild>
+                      <Link href="/play">
+                        Choose Another Song
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           )}
         </AnimatePresence>

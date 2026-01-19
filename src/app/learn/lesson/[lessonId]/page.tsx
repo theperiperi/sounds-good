@@ -3,10 +3,29 @@
 import { use } from "react";
 import Link from "next/link";
 import { grades } from "@/data/courses";
+import { getLessonContent, getLessonNotes } from "@/data/lessonContent";
 import { Keyboard } from "@/components/keyboard/Keyboard";
 import { notFound } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, BookOpen, Play, FlaskConical, Clock, Lightbulb, CheckCircle, ArrowRight, Music } from "lucide-react";
 
-// Find a lesson by ID across all grades
+const typeIcons = {
+  theory: BookOpen,
+  practical: Play,
+  exercise: FlaskConical,
+};
+
+// Unified gold theme - all types use gold with subtle variation
+const typeColors = {
+  theory: "bg-gold/10 text-gold border-gold/30",
+  practical: "bg-gold/20 text-gold border-gold/40",
+  exercise: "bg-gold/15 text-gold border-gold/35",
+};
+
 function findLesson(lessonId: string) {
   for (const grade of grades) {
     for (const module of grade.modules) {
@@ -32,127 +51,229 @@ export default function LessonPage({
   }
 
   const { lesson, module, grade } = result;
+  const TypeIcon = typeIcons[lesson.type];
+
+  // Get lesson content and notes
+  const lessonContent = getLessonContent(lessonId);
+  const highlightedNotes = getLessonNotes(lessonId);
+
+  // Find next lesson
+  const currentIndex = module.lessons.findIndex(l => l.id === lessonId);
+  const nextLesson = module.lessons[currentIndex + 1];
 
   return (
     <main className="min-h-[calc(100vh-4rem)] p-8">
       <div className="max-w-6xl mx-auto">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
-          <Link href="/learn" className="hover:text-white">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
+          <Link href="/learn" className="hover:text-foreground transition-colors">
             Learn
           </Link>
-          <span>/</span>
-          <Link href={`/learn/grade/${grade.id}`} className="hover:text-white">
+          <span className="text-muted-foreground/50">/</span>
+          <Link href={`/learn/grade/${grade.id}`} className="hover:text-foreground transition-colors">
             Grade {grade.id}
           </Link>
-          <span>/</span>
-          <span className="text-white">{lesson.title}</span>
+          <span className="text-muted-foreground/50">/</span>
+          <span className="text-foreground">{lesson.title}</span>
         </div>
 
         {/* Lesson header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                lesson.type === "theory"
-                  ? "bg-blue-500/20 text-blue-400"
-                  : lesson.type === "practical"
-                  ? "bg-green-500/20 text-green-400"
-                  : "bg-purple-500/20 text-purple-400"
-              }`}
-            >
+            <Badge variant="outline" className={typeColors[lesson.type]}>
+              <TypeIcon className="w-3 h-3 mr-1" />
               {lesson.type}
+            </Badge>
+            <span className="text-muted-foreground flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              {lesson.duration}
             </span>
-            <span className="text-gray-500">{lesson.duration}</span>
           </div>
 
-          <h1 className="text-4xl font-bold mb-2">{lesson.title}</h1>
-          <p className="text-gray-400 text-lg">{lesson.description}</p>
+          <h1 className="font-serif text-4xl font-bold mb-3 text-shadow-gold">{lesson.title}</h1>
+          <p className="text-muted-foreground text-lg">{lesson.description}</p>
         </div>
 
         {/* Lesson content area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Placeholder lesson content */}
-            <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-8">
-              <h2 className="text-xl font-bold mb-4">Lesson Content</h2>
-              <p className="text-gray-400 mb-6">
-                This lesson will teach you about: {lesson.description}
-              </p>
-
-              {lesson.type === "practical" || lesson.type === "exercise" ? (
-                <div className="space-y-6">
-                  <p className="text-gray-300">
-                    Use the keyboard below to practice. The notes you need to play
-                    will be highlighted.
-                  </p>
-
-                  {/* Interactive keyboard */}
-                  <div className="flex justify-center py-8 overflow-x-auto">
-                    <Keyboard highlightedNotes={[60, 62, 64, 65, 67]} />
-                  </div>
-
-                  <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4">
-                    <p className="text-indigo-300 text-sm">
-                      <strong>Try it:</strong> Play the highlighted notes (C, D, E, F, G) in order
+            {/* Lesson Content */}
+            <Card className="bg-card/50 border-border">
+              <CardHeader>
+                <CardTitle className="font-serif">Lesson Content</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {lessonContent ? (
+                  <>
+                    {/* Introduction */}
+                    <p className="text-foreground leading-relaxed">
+                      {lessonContent.content.introduction}
                     </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="prose prose-invert max-w-none">
-                  <p className="text-gray-300">
-                    Lesson content will be displayed here. This section will contain
-                    explanations, diagrams, and examples for theory lessons.
-                  </p>
-                </div>
-              )}
-            </div>
+
+                    {/* Key Points */}
+                    <div className="space-y-3">
+                      <h3 className="font-semibold text-gold">Key Points</h3>
+                      <ul className="space-y-2">
+                        {lessonContent.content.keyPoints.map((point, i) => (
+                          <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                            <span className="w-5 h-5 rounded-full bg-gold/20 text-gold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                              {i + 1}
+                            </span>
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Scale/Chord Info if present */}
+                    {lessonContent.scale && (
+                      <Card className="bg-gold/5 border-gold/20">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Music className="w-4 h-4 text-gold" />
+                            <span className="font-semibold text-gold">{lessonContent.scale.name}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Notes: {lessonContent.scale.notes.join(" - ")}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {lessonContent.chord && (
+                      <Card className="bg-gold/5 border-gold/20">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Music className="w-4 h-4 text-gold" />
+                            <span className="font-semibold text-gold">{lessonContent.chord.name}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Notes: {lessonContent.chord.notes.join(" - ")}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Interactive Keyboard for practical/exercise lessons */}
+                    {(lesson.type === "practical" || lesson.type === "exercise") && highlightedNotes.length > 0 && (
+                      <div className="space-y-6">
+                        <div className="flex justify-center py-6 overflow-x-auto">
+                          <Keyboard highlightedNotes={highlightedNotes} />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Practice instruction */}
+                    {lessonContent.content.practice && (
+                      <Card className="bg-gold/10 border-gold/20">
+                        <CardContent className="p-4 flex items-start gap-3">
+                          <Play className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="text-gold">Practice:</strong>{" "}
+                            <span className="text-foreground">{lessonContent.content.practice}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Tip */}
+                    {lessonContent.content.tip && (
+                      <Card className="bg-card border-border">
+                        <CardContent className="p-4 flex items-start gap-3">
+                          <Lightbulb className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="text-gold">Tip:</strong>{" "}
+                            <span className="text-muted-foreground">{lessonContent.content.tip}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* Fallback content for lessons without rich content yet */}
+                    <p className="text-muted-foreground">
+                      This lesson covers: {lesson.description}
+                    </p>
+
+                    {(lesson.type === "practical" || lesson.type === "exercise") && (
+                      <div className="space-y-6">
+                        <p className="text-foreground">
+                          Use the keyboard below to practice. The notes you need to play
+                          will be highlighted.
+                        </p>
+
+                        <div className="flex justify-center py-6 overflow-x-auto">
+                          <Keyboard highlightedNotes={[60, 62, 64, 65, 67]} />
+                        </div>
+
+                        <Card className="bg-gold/10 border-gold/20">
+                          <CardContent className="p-4 flex items-start gap-3">
+                            <Lightbulb className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
+                            <p className="text-sm">
+                              <strong className="text-gold">Try it:</strong>{" "}
+                              <span className="text-foreground">Explore the keyboard and practice the highlighted notes.</span>
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Progress section */}
-            <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold">Your Progress</h3>
-                <span className="text-gray-400 text-sm">Not started</span>
-              </div>
-              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                <div className="h-full w-0 bg-green-500 rounded-full" />
-              </div>
-            </div>
+            <Card className="bg-card/50 border-border">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold">Your Progress</h3>
+                  <span className="text-muted-foreground text-sm">Not started</span>
+                </div>
+                <Progress value={0} className="h-2" />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Module info */}
-            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-              <h3 className="font-bold mb-2">{module.title}</h3>
-              <p className="text-gray-400 text-sm mb-4">{module.description}</p>
-
-              <div className="space-y-2">
-                {module.lessons.map((l, i) => (
-                  <Link
-                    key={l.id}
-                    href={`/learn/lesson/${l.id}`}
-                    className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                      l.id === lessonId
-                        ? "bg-indigo-600 text-white"
-                        : "text-gray-400 hover:bg-gray-700 hover:text-white"
-                    }`}
-                  >
-                    {i + 1}. {l.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <Card className="bg-card/50 border-border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{module.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-muted-foreground text-sm mb-4">{module.description}</p>
+                <Separator className="mb-4" />
+                <div className="space-y-1">
+                  {module.lessons.map((l, i) => (
+                    <Link
+                      key={l.id}
+                      href={`/learn/lesson/${l.id}`}
+                      className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
+                        l.id === lessonId
+                          ? "gradient-gold text-black font-medium"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      }`}
+                    >
+                      {i + 1}. {l.title}
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Actions */}
             <div className="space-y-3">
-              <button className="w-full py-3 bg-green-600 hover:bg-green-700 rounded-xl font-medium transition-colors">
+              <Button className="w-full gradient-gold text-black hover:opacity-90">
+                <CheckCircle className="w-4 h-4 mr-2" />
                 Mark Complete
-              </button>
-              <button className="w-full py-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-medium transition-colors">
-                Next Lesson →
-              </button>
+              </Button>
+              <Button variant="secondary" className="w-full">
+                Next Lesson
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
             </div>
           </div>
         </div>

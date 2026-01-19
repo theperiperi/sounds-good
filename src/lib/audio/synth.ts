@@ -15,25 +15,51 @@ export async function initAudio(): Promise<void> {
 
   await Tone.start();
 
+  // Create a bright, clear piano-like sound
   synth = new Tone.PolySynth(Tone.Synth, {
     oscillator: {
-      type: "triangle",
+      type: "fatsine",    // Sine with slight detuning for richness
+      count: 3,           // 3 oscillators layered
+      spread: 15,         // Slight detune spread for width
     },
     envelope: {
-      attack: 0.02,
-      decay: 0.1,
-      sustain: 0.3,
-      release: 1,
+      attack: 0.005,      // Very fast attack for crisp response
+      decay: 0.3,         // Moderate decay
+      sustain: 0.2,       // Lower sustain for clarity
+      release: 1.2,       // Natural release tail
     },
   }).toDestination();
 
-  // Add a subtle reverb for a nicer piano-like sound
-  const reverb = new Tone.Reverb({
-    decay: 1.5,
-    wet: 0.2,
+  // Set volume
+  synth.volume.value = -6;
+
+  // Add EQ for brightness
+  const eq = new Tone.EQ3({
+    low: -2,
+    mid: 0,
+    high: 3,             // Boost highs for clarity
+    lowFrequency: 250,
+    highFrequency: 3000,
   }).toDestination();
 
-  synth.connect(reverb);
+  // Add subtle compression for consistent dynamics
+  const compressor = new Tone.Compressor({
+    threshold: -20,
+    ratio: 3,
+    attack: 0.01,
+    release: 0.1,
+  }).toDestination();
+
+  // Add a small room reverb for natural space
+  const reverb = new Tone.Reverb({
+    decay: 1.0,
+    wet: 0.15,           // Subtle reverb
+  }).toDestination();
+
+  // Signal chain: synth -> compressor -> eq -> reverb -> output
+  synth.connect(compressor);
+  compressor.connect(eq);
+  eq.connect(reverb);
 
   isInitialized = true;
 }

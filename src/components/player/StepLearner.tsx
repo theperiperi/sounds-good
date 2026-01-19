@@ -8,6 +8,24 @@ import { useSongStore, HandMode } from "@/stores/songStore";
 import { ParsedNote } from "@/lib/midi/parser";
 import { initAudio, playNoteForDuration } from "@/lib/audio/synth";
 import { onMidiNote, initMidi } from "@/lib/midi/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+  Hand,
+  Eye,
+  Keyboard as KeyboardIcon,
+  Minus,
+  Plus,
+  Music,
+  Fingerprint
+} from "lucide-react";
 
 interface StepLearnerProps {
   onComplete?: () => void;
@@ -157,7 +175,7 @@ export function StepLearner({ onComplete }: StepLearnerProps) {
     currentStep.forEach((note, i) => {
       setTimeout(() => {
         playNoteForDuration(note.midi, note.duration * (100 / tempo), 0.7);
-      }, i * 50); // Slight stagger for chords so you can hear each note
+      }, i * 50);
     });
   }, [currentStep, tempo]);
 
@@ -180,14 +198,14 @@ export function StepLearner({ onComplete }: StepLearnerProps) {
     return () => clearInterval(interval);
   }, [learnMode, currentStep, currentStepIndex, steps.length, nextStep, audioEnabled, tempo, song?.tempo]);
 
-  // Get highlighted keys for keyboard
+  // Get highlighted keys for keyboard - use GOLD for highlights
   const highlightedKeys = currentStep.map((note) => ({
     midi: note.midi,
-    color: note.hand === "left" ? "#3b82f6" : "#6366f1", // blue for left, indigo for right
+    color: note.hand === "left" ? "#d4a853" : "#e8c87a", // gold for left, light gold for right
     finger: showFingering ? note.finger : undefined,
   }));
 
-  // Get all notes for falling notes display - access primitive values to avoid infinite loop
+  // Get all notes for falling notes display
   const songTracks = useSongStore((state) => state.song?.tracks);
   const allNotes = useMemo(() => {
     if (!songTracks) return [];
@@ -201,130 +219,142 @@ export function StepLearner({ onComplete }: StepLearnerProps) {
 
   if (!song) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-gray-400">No song loaded</p>
-      </div>
+      <Card className="bg-card/50 border-border">
+        <CardContent className="flex items-center justify-center h-96">
+          <p className="text-muted-foreground">No song loaded</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Controls bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-800/50 border border-gray-700 rounded-xl p-4">
-        {/* Hand selection */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Hand:</span>
-          <div className="flex bg-gray-900 rounded-lg p-1">
-            {(["left", "right", "both"] as HandMode[]).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => setHandMode(mode)}
-                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                  handMode === mode
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-400 hover:text-white"
-                }`}
+      <Card className="bg-card/50 border-border">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* Hand selection */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground font-medium">Hand</span>
+              <div className="flex bg-secondary rounded-lg p-1">
+                {(["left", "right", "both"] as HandMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setHandMode(mode)}
+                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      handMode === mode
+                        ? "gradient-gold text-black shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {mode === "left" ? "Left" : mode === "right" ? "Right" : "Both"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Mode selection */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground font-medium">Mode</span>
+              <div className="flex bg-secondary rounded-lg p-1">
+                <button
+                  onClick={() => setLearnMode("practice")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                    learnMode === "practice"
+                      ? "gradient-gold text-black shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <KeyboardIcon className="w-3.5 h-3.5" />
+                  Practice
+                </button>
+                <button
+                  onClick={() => setLearnMode("watch")}
+                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+                    learnMode === "watch"
+                      ? "gradient-gold text-black shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  Watch
+                </button>
+              </div>
+            </div>
+
+            {/* Tempo control */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground font-medium">Tempo</span>
+              <div className="flex items-center bg-secondary rounded-lg p-1">
+                <button
+                  onClick={() => setTempo(Math.max(25, tempo - 25))}
+                  className="w-8 h-8 rounded-md hover:bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="w-16 text-center font-bold text-gold">{tempo}%</span>
+                <button
+                  onClick={() => setTempo(Math.min(200, tempo + 25))}
+                  className="w-8 h-8 rounded-md hover:bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Toggle buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={showFingering ? "default" : "secondary"}
+                size="sm"
+                onClick={toggleFingering}
+                className={showFingering ? "gradient-gold text-black hover:opacity-90" : ""}
               >
-                {mode === "left" ? "Left" : mode === "right" ? "Right" : "Both"}
-              </button>
-            ))}
+                <Fingerprint className="w-4 h-4 mr-1.5" />
+                Fingering
+              </Button>
+              <Button
+                variant={audioEnabled ? "default" : "secondary"}
+                size="sm"
+                onClick={toggleAudio}
+                className={audioEnabled ? "gradient-gold text-black hover:opacity-90" : ""}
+              >
+                {audioEnabled ? <Volume2 className="w-4 h-4 mr-1.5" /> : <VolumeX className="w-4 h-4 mr-1.5" />}
+                Audio
+              </Button>
+            </div>
           </div>
-        </div>
-
-        {/* Mode selection */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Mode:</span>
-          <div className="flex bg-gray-900 rounded-lg p-1">
-            <button
-              onClick={() => setLearnMode("practice")}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                learnMode === "practice"
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Practice
-            </button>
-            <button
-              onClick={() => setLearnMode("watch")}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                learnMode === "watch"
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Watch
-            </button>
-          </div>
-        </div>
-
-        {/* Tempo control */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Tempo:</span>
-          <button
-            onClick={() => setTempo(tempo - 25)}
-            className="w-8 h-8 bg-gray-700 rounded hover:bg-gray-600"
-          >
-            -
-          </button>
-          <span className="w-12 text-center font-medium">{tempo}%</span>
-          <button
-            onClick={() => setTempo(tempo + 25)}
-            className="w-8 h-8 bg-gray-700 rounded hover:bg-gray-600"
-          >
-            +
-          </button>
-        </div>
-
-        {/* Toggle buttons */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleFingering}
-            className={`px-3 py-1 rounded-lg text-sm transition-colors ${
-              showFingering
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-700 text-gray-400"
-            }`}
-          >
-            Fingering
-          </button>
-          <button
-            onClick={toggleAudio}
-            className={`px-3 py-1 rounded-lg text-sm transition-colors ${
-              audioEnabled
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-700 text-gray-400"
-            }`}
-          >
-            Audio
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Progress bar */}
-      <div className="relative h-2 bg-gray-800 rounded-full overflow-hidden">
-        <motion.div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 to-purple-500"
-          initial={{ width: 0 }}
-          animate={{ width: `${getProgress()}%` }}
-          transition={{ duration: 0.3 }}
-        />
+      <div className="relative">
+        <Progress value={getProgress()} className="h-2" />
       </div>
 
       {/* Step info */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-400">
-          Step {currentStepIndex + 1} of {steps.length}
-          {song && ` • Measure ${Math.floor(currentTime / (240 / song.tempo)) + 1}`}
+      <div className="flex items-center justify-between px-1">
+        <div className="text-sm text-muted-foreground">
+          <span className="text-foreground font-medium">Step {currentStepIndex + 1}</span>
+          <span className="mx-1.5">of</span>
+          <span>{steps.length}</span>
+          {song && (
+            <>
+              <span className="mx-2 text-border">•</span>
+              <span>Measure {Math.floor(currentTime / (240 / song.tempo)) + 1}</span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {midiConnected ? (
-            <span className="flex items-center gap-1 text-sm text-green-400">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <Badge variant="outline" className="border-gold/30 text-gold">
+              <span className="w-1.5 h-1.5 bg-gold rounded-full mr-1.5 animate-pulse" />
               MIDI Connected
-            </span>
+            </Badge>
           ) : (
-            <span className="text-sm text-gray-500">No MIDI device</span>
+            <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">
+              No MIDI device
+            </Badge>
           )}
         </div>
       </div>
@@ -345,85 +375,101 @@ export function StepLearner({ onComplete }: StepLearnerProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className={`bg-gray-800/50 border rounded-xl p-6 text-center ${
-            feedback === "correct"
-              ? "border-green-500 bg-green-500/10"
-              : feedback === "wrong"
-              ? "border-red-500 bg-red-500/10"
-              : "border-gray-700"
-          }`}
         >
-          <div className="text-lg font-medium mb-4">
-            {learnMode === "watch" ? "Watching..." : "Play these notes:"}
-          </div>
-
-          <div className="flex justify-center gap-4 mb-4">
-            {currentStep.map((note, i) => (
-              <div
-                key={i}
-                className={`px-4 py-3 rounded-xl ${
-                  correctNotes.has(note.midi)
-                    ? "bg-green-500 text-white"
-                    : note.hand === "left"
-                    ? "bg-blue-500/20 text-blue-300 border border-blue-500/50"
-                    : "bg-indigo-500/20 text-indigo-300 border border-indigo-500/50"
-                }`}
-              >
-                <div className="text-2xl font-bold">{note.name}</div>
-                {showFingering && note.finger && (
-                  <div className="text-sm mt-1">
-                    Finger {note.finger} • {note.hand === "left" ? "L" : "R"}
-                  </div>
-                )}
+          <Card className={`border-2 transition-colors ${
+            feedback === "correct"
+              ? "border-gold bg-gold/5"
+              : feedback === "wrong"
+              ? "border-red-500 bg-red-500/5"
+              : "border-border bg-card/50"
+          }`}>
+            <CardContent className="p-6 text-center">
+              <div className="text-sm font-medium text-muted-foreground mb-4">
+                {learnMode === "watch" ? "Watching playback..." : "Play these notes"}
               </div>
-            ))}
-          </div>
 
-          <button
-            onClick={playReference}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm transition-colors"
-          >
-            Hear Reference
-          </button>
+              <div className="flex justify-center gap-3 flex-wrap mb-6">
+                {currentStep.map((note, i) => (
+                  <div
+                    key={i}
+                    className={`relative px-6 py-4 rounded-xl transition-all ${
+                      correctNotes.has(note.midi)
+                        ? "bg-gold text-black shadow-lg shadow-gold/30"
+                        : "bg-gradient-to-b from-gold/20 to-gold/10 border border-gold/30 text-foreground"
+                    }`}
+                  >
+                    <div className="text-2xl font-bold font-serif">{note.name}</div>
+                    {showFingering && note.finger && (
+                      <div className="text-xs mt-1 text-muted-foreground">
+                        <Badge variant="outline" className={`text-xs ${
+                          note.hand === "left"
+                            ? "border-gold/50 bg-gold/10 text-gold"
+                            : "border-gold-light/50 bg-gold-light/10 text-gold-light"
+                        }`}>
+                          {note.hand === "left" ? "L" : "R"}{note.finger}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={playReference}
+              >
+                <Volume2 className="w-4 h-4 mr-2" />
+                Hear Reference
+              </Button>
+            </CardContent>
+          </Card>
         </motion.div>
       </AnimatePresence>
 
       {/* Keyboard */}
-      <div className="flex justify-center overflow-x-auto pb-4">
-        <Keyboard
-          startOctave={2}
-          octaves={4}
-          highlightedKeys={highlightedKeys}
-          activeKeys={Array.from(activeKeys)}
-          wrongKeys={Array.from(wrongNotes)}
-          onNoteOn={handleKeyPress}
-          onNoteOff={handleKeyRelease}
-          showLabels
-        />
-      </div>
+      <Card className="bg-card/50 border-border overflow-visible">
+        <CardContent className="p-6 overflow-visible">
+          <div className="flex justify-center overflow-x-auto">
+            <Keyboard
+              startOctave={2}
+              octaves={4}
+              highlightedKeys={highlightedKeys}
+              activeKeys={Array.from(activeKeys)}
+              wrongKeys={Array.from(wrongNotes)}
+              onNoteOn={handleKeyPress}
+              onNoteOff={handleKeyRelease}
+              showLabels
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Navigation buttons */}
-      <div className="flex justify-center gap-4">
-        <button
+      <div className="flex justify-center gap-3">
+        <Button
+          variant="secondary"
           onClick={() => prevStep()}
           disabled={currentStepIndex === 0}
-          className="px-6 py-3 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-medium transition-colors"
         >
-          ← Previous
-        </button>
-        <button
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Previous
+        </Button>
+        <Button
+          variant="secondary"
           onClick={() => reset()}
-          className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-medium transition-colors"
         >
+          <RotateCcw className="w-4 h-4 mr-1" />
           Reset
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => nextStep()}
           disabled={currentStepIndex === steps.length - 1}
-          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-medium transition-colors"
+          className="gradient-gold text-black hover:opacity-90"
         >
-          Next →
-        </button>
+          Next
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </Button>
       </div>
     </div>
   );

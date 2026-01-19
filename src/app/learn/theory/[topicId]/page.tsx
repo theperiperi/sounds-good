@@ -12,8 +12,27 @@ import {
   ChordProgressionPlayer,
   RhythmVisualizer,
 } from "@/components/theory";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+  ArrowLeft,
+  Target,
+  Link2,
+  Music2,
+  Timer,
+  Ruler,
+  Music
+} from "lucide-react";
 
-// Topic descriptions
+const topicIcons: Record<string, React.ElementType> = {
+  "circle-of-fifths": Target,
+  "chord-progressions": Link2,
+  "scales-modes": Music2,
+  "rhythm-time": Timer,
+  "intervals": Ruler,
+  "harmony": Music,
+};
+
 const topicDescriptions: Record<string, { intro: string; sections: { heading: string; content: string }[] }> = {
   "circle-of-fifths": {
     intro: "The Circle of Fifths is your roadmap to understanding key relationships, chord progressions, and modulation in music.",
@@ -50,7 +69,7 @@ const topicDescriptions: Record<string, { intro: string; sections: { heading: st
     sections: [
       {
         heading: "Scale Degrees",
-        content: "The numbers on the keyboard show scale degrees. The root (1) is your home base. Other degrees create different tensions and resolutions relative to it. Flats (♭) indicate lowered notes compared to the major scale."
+        content: "The numbers on the keyboard show scale degrees. The root (1) is your home base. Other degrees create different tensions and resolutions relative to it. Flats (b) indicate lowered notes compared to the major scale."
       },
       {
         heading: "Finding the Right Scale",
@@ -103,7 +122,6 @@ const topicDescriptions: Record<string, { intro: string; sections: { heading: st
   }
 };
 
-// Map topic IDs to their interactive components
 function getInteractiveComponent(topicId: string) {
   switch (topicId) {
     case "circle-of-fifths":
@@ -136,6 +154,7 @@ export default function TheoryTopicPage({
     notFound();
   }
 
+  const Icon = topicIcons[topicId] || Music;
   const interactiveComponent = getInteractiveComponent(topicId);
 
   return (
@@ -144,16 +163,19 @@ export default function TheoryTopicPage({
         {/* Back link */}
         <Link
           href="/learn"
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
-          <span>←</span> Back to Learn
+          <ArrowLeft className="w-4 h-4" />
+          Back to Learn
         </Link>
 
         {/* Header */}
         <div className="mb-12 text-center">
-          <span className="text-6xl mb-4 block">{topic.icon}</span>
-          <h1 className="text-4xl font-bold mb-4">{topic.title}</h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl gradient-gold flex items-center justify-center shadow-glow-gold">
+            <Icon className="w-10 h-10 text-black" />
+          </div>
+          <h1 className="font-serif text-4xl font-bold mb-4 text-shadow-gold">{topic.title}</h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             {description.intro}
           </p>
         </div>
@@ -168,32 +190,43 @@ export default function TheoryTopicPage({
         {/* Explanation sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
           {description.sections.map((section, index) => (
-            <div
-              key={index}
-              className="bg-gray-800/50 border border-gray-700 rounded-2xl p-6"
-            >
-              <h2 className="text-xl font-bold mb-3">{section.heading}</h2>
-              <p className="text-gray-300 leading-relaxed">{section.content}</p>
-            </div>
+            <Card key={index} className="bg-card/50 border-border">
+              <CardHeader>
+                <CardTitle className="text-lg">{section.heading}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground leading-relaxed">{section.content}</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
         {/* Other topics */}
-        <div className="border-t border-gray-800 pt-12">
-          <h3 className="text-xl font-bold mb-6">Explore More Topics</h3>
+        <Separator className="mb-12" />
+        <div>
+          <h3 className="font-serif text-xl font-bold mb-6">Explore More Topics</h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {musicTheoryTopics
               .filter((t) => t.id !== topicId)
-              .map((t) => (
-                <Link
-                  key={t.id}
-                  href={`/learn/theory/${t.id}`}
-                  className="bg-gray-800/50 hover:bg-gray-800 border border-gray-700 rounded-xl p-4 text-center transition-all hover:border-indigo-500 hover:scale-105"
-                >
-                  <span className="text-3xl mb-2 block">{t.icon}</span>
-                  <h4 className="font-medium text-sm">{t.title}</h4>
-                </Link>
-              ))}
+              .map((t) => {
+                const TopicIcon = topicIcons[t.id] || Music;
+                return (
+                  <Link
+                    key={t.id}
+                    href={`/learn/theory/${t.id}`}
+                    className="group"
+                  >
+                    <Card className="h-full bg-card/50 border-border hover:border-gold/30 transition-all hover:shadow-glow-gold-sm">
+                      <CardContent className="p-4 text-center">
+                        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center group-hover:bg-gold/10 transition-colors">
+                          <TopicIcon className="w-6 h-6 text-gold" />
+                        </div>
+                        <h4 className="font-medium text-sm">{t.title}</h4>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
           </div>
         </div>
       </div>
