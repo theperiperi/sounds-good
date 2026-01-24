@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/layout/Navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth/AuthProvider";
-import { AuthGuard } from "@/components/auth/AuthGuard";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
@@ -18,8 +16,37 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Sounds Good - Premium Piano Education",
-  description: "Master the piano with world-class instruction and interactive learning",
+  title: "Sounds Good - Master Piano with World-Class Interactive Learning",
+  description:
+    "Transform your piano journey with Sounds Good. Interactive lessons, MIDI support, music theory visualization, and AI-powered sheet music transcription. Start learning today.",
+  keywords: [
+    "piano lessons",
+    "learn piano online",
+    "music theory",
+    "MIDI piano",
+    "interactive piano",
+    "piano education",
+    "ABRSM grades",
+    "sheet music",
+    "piano practice",
+  ],
+  openGraph: {
+    title: "Sounds Good - Premium Piano Education",
+    description:
+      "Master the piano with world-class instruction and interactive learning",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sounds Good - Premium Piano Education",
+    description:
+      "Master the piano with world-class instruction and interactive learning",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +56,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${playfair.variable} min-h-screen antialiased relative`}>
+      <body
+        className={`${inter.variable} ${playfair.variable} min-h-screen antialiased relative`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -45,12 +74,7 @@ export default function RootLayout({
             </div>
 
             {/* Content */}
-            <AuthGuard>
-              <div className="relative z-10">
-                <Navigation />
-                <div className="pt-16">{children}</div>
-              </div>
-            </AuthGuard>
+            <div className="relative z-10">{children}</div>
 
             <Toaster />
           </AuthProvider>
