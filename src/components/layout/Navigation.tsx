@@ -8,7 +8,7 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 
 const tabs = [
-  { href: "/", label: "Free Play", icon: Piano },
+  { href: "/free-play", label: "Free Play", icon: Piano },
   { href: "/learn", label: "Learn", icon: BookOpen },
   { href: "/play", label: "Play Songs", icon: Music },
   { href: "/compose", label: "Compose", icon: PenTool },
@@ -34,10 +34,7 @@ export function Navigation() {
           {/* Tabs */}
           <div className="flex gap-1">
             {tabs.map((tab) => {
-              const isActive =
-                tab.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(tab.href);
+              const isActive = pathname.startsWith(tab.href);
               const Icon = tab.icon;
 
               return (
