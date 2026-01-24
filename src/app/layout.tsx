@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
@@ -44,10 +45,12 @@ export default function RootLayout({
             </div>
 
             {/* Content */}
-            <div className="relative z-10">
-              <Navigation />
-              <div className="pt-16">{children}</div>
-            </div>
+            <AuthGuard>
+              <div className="relative z-10">
+                <Navigation />
+                <div className="pt-16">{children}</div>
+              </div>
+            </AuthGuard>
 
             <Toaster />
           </AuthProvider>
