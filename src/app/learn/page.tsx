@@ -15,6 +15,8 @@ import {
   GraduationCap,
   Sparkles
 } from "lucide-react";
+import { useProgress, calculateGradeProgress } from "@/hooks/useProgress";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const topicIcons: Record<string, React.ElementType> = {
   "circle-of-fifths": Target,
@@ -26,6 +28,10 @@ const topicIcons: Record<string, React.ElementType> = {
 };
 
 export default function LearnPage() {
+  const { user } = useAuth();
+  const { getCompletedLessons } = useProgress();
+  const completedLessons = getCompletedLessons();
+
   return (
     <main className="min-h-[calc(100vh-4rem)] p-8">
       <div className="max-w-6xl mx-auto">
@@ -89,6 +95,7 @@ export default function LearnPage() {
                 (acc, m) => acc + m.lessons.length,
                 0
               );
+              const gradeProgress = user ? calculateGradeProgress(grade.modules, completedLessons) : 0;
 
               return (
                 <Link
@@ -112,12 +119,12 @@ export default function LearnPage() {
                         {grade.description}
                       </p>
 
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-                        <span>{grade.modules.length} modules</span>
-                        <span>{totalLessons} lessons</span>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
+                        <span>{grade.modules.length} modules · {totalLessons} lessons</span>
+                        {user && gradeProgress > 0 && <span className="text-gold">{gradeProgress}%</span>}
                       </div>
 
-                      <Progress value={0} className="h-1.5" />
+                      <Progress value={gradeProgress} className="h-1.5" />
                     </CardContent>
                   </Card>
                 </Link>

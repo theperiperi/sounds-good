@@ -7,7 +7,9 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, BookOpen, Play, FlaskConical, Clock, ChevronRight } from "lucide-react";
+import { ArrowLeft, BookOpen, Play, FlaskConical, Clock, ChevronRight, Check } from "lucide-react";
+import { useProgress, calculateGradeProgress, calculateModuleProgress } from "@/hooks/useProgress";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const typeIcons = {
   theory: BookOpen,
@@ -28,10 +30,15 @@ export default function GradePage({
 }) {
   const { gradeId } = use(params);
   const grade = grades.find((g) => g.id === parseInt(gradeId));
+  const { user } = useAuth();
+  const { getCompletedLessons, isLessonCompleted } = useProgress();
+  const completedLessons = getCompletedLessons();
 
   if (!grade) {
     notFound();
   }
+
+  const gradeProgress = user ? calculateGradeProgress(grade.modules, completedLessons) : 0;
 
   return (
     <main className="min-h-[calc(100vh-4rem)] p-8">
@@ -59,9 +66,11 @@ export default function GradePage({
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-muted-foreground">Overall Progress</span>
-              <span className="text-sm font-medium text-gold">0%</span>
+              <span className="text-sm font-medium text-gold">
+                {user ? `${gradeProgress}%` : "Sign in to track"}
+              </span>
             </div>
-            <Progress value={0} className="h-2" />
+            <Progress value={gradeProgress} className="h-2" />
           </CardContent>
         </Card>
 
@@ -87,20 +96,27 @@ export default function GradePage({
                 <div className="divide-y divide-border">
                   {module.lessons.map((lesson, lessonIndex) => {
                     const TypeIcon = typeIcons[lesson.type];
+                    const lessonCompleted = isLessonCompleted(lesson.id);
                     return (
                       <Link
                         key={lesson.id}
                         href={`/learn/lesson/${lesson.id}`}
                         className="flex items-center gap-4 p-4 hover:bg-secondary/50 transition-colors group"
                       >
-                        {/* Lesson number */}
-                        <span className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-sm text-muted-foreground">
-                          {lessonIndex + 1}
-                        </span>
+                        {/* Lesson number or checkmark */}
+                        {lessonCompleted ? (
+                          <span className="w-8 h-8 rounded-lg bg-gold/20 flex items-center justify-center">
+                            <Check className="w-4 h-4 text-gold" />
+                          </span>
+                        ) : (
+                          <span className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-sm text-muted-foreground">
+                            {lessonIndex + 1}
+                          </span>
+                        )}
 
                         {/* Lesson info */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium truncate group-hover:text-gold transition-colors">
+                          <h3 className={`font-medium truncate group-hover:text-gold transition-colors ${lessonCompleted ? "text-gold" : ""}`}>
                             {lesson.title}
                           </h3>
                           <p className="text-muted-foreground text-sm truncate">
