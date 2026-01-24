@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
@@ -34,20 +35,22 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* Decorative background elements */}
-          <div className="fixed inset-0 pointer-events-none overflow-hidden">
-            <div className="blur-spot blur-spot-gold w-[600px] h-[600px] -top-48 -left-48 opacity-30" />
-            <div className="blur-spot blur-spot-gold w-[500px] h-[500px] top-1/3 -right-48 opacity-20" />
-            <div className="blur-spot blur-spot-gold w-[400px] h-[400px] bottom-0 left-1/3 opacity-15" />
-          </div>
+          <AuthProvider>
+            {/* Decorative background elements */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+              <div className="blur-spot blur-spot-gold w-[600px] h-[600px] -top-48 -left-48 opacity-30" />
+              <div className="blur-spot blur-spot-gold w-[500px] h-[500px] top-1/3 -right-48 opacity-20" />
+              <div className="blur-spot blur-spot-gold w-[400px] h-[400px] bottom-0 left-1/3 opacity-15" />
+            </div>
 
-          {/* Content */}
-          <div className="relative z-10">
-            <Navigation />
-            <div className="pt-16">{children}</div>
-          </div>
+            {/* Content */}
+            <div className="relative z-10">
+              <Navigation />
+              <div className="pt-16">{children}</div>
+            </div>
 
-          <Toaster />
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
