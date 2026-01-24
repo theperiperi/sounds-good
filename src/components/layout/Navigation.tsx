@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Piano, BookOpen, Music, PenTool, Music2 } from "lucide-react";
 import { MidiStatus } from "@/components/keyboard/MidiStatus";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
 const tabs = [
   { href: "/", label: "Free Play", icon: Piano },
@@ -55,8 +56,11 @@ export function Navigation() {
             })}
           </div>
 
-          {/* MIDI status */}
-          <MidiStatus />
+          {/* Right section */}
+          <div className="flex items-center gap-2">
+            <ModeToggle />
+            <MidiStatus />
+          </div>
         </div>
       </div>
     </nav>

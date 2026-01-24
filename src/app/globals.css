@@ -53,7 +53,8 @@
 }
 
 /* Premium Dark Theme (default) */
-:root {
+:root,
+.dark {
   --radius: 0.625rem;
   --background: #09090b;
   --foreground: #f9f6f0;
@@ -88,7 +89,7 @@
   --sidebar-ring: #d4a853;
 }
 
-/* Light theme (not used by default, but available) */
+/* Light theme */
 .light {
   --background: #f9f6f0;
   --foreground: #09090b;
@@ -108,6 +109,19 @@
   --border: rgba(184, 134, 11, 0.2);
   --input: rgba(0, 0, 0, 0.05);
   --ring: #b8860b;
+  --chart-1: #b8860b;
+  --chart-2: #4f46e5;
+  --chart-3: #16a34a;
+  --chart-4: #d97706;
+  --chart-5: #db2777;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #09090b;
+  --sidebar-primary: #b8860b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ebe5d9;
+  --sidebar-accent-foreground: #09090b;
+  --sidebar-border: rgba(184, 134, 11, 0.2);
+  --sidebar-ring: #b8860b;
 }
 
 @layer base {
@@ -121,19 +135,13 @@
 
 /* Premium Utilities */
 @layer utilities {
-  /* Glass effect */
+  /* Glass effect - theme aware */
   .glass {
-    background: rgba(15, 15, 18, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(212, 168, 83, 0.1);
+    @apply bg-card/80 backdrop-blur-xl border border-border;
   }
 
   .glass-strong {
-    background: rgba(15, 15, 18, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(212, 168, 83, 0.15);
+    @apply bg-card/95 backdrop-blur-2xl border border-border;
   }
 
   /* Premium gradients */

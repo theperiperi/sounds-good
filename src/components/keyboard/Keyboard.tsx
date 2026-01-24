@@ -253,7 +253,7 @@ export function Keyboard({
 
       {/* Audio init indicator */}
       {!audioReady && (
-        <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-gray-500">
+        <p className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">
           Click or press a key to enable sound
         </p>
       )}
