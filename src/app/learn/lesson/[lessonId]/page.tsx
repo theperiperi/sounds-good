@@ -1,7 +1,8 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { grades } from "@/data/courses";
 import { getLessonContent, getLessonNotes } from "@/data/lessonContent";
 import { Keyboard } from "@/components/keyboard/Keyboard";
@@ -11,7 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, BookOpen, Play, FlaskConical, Clock, Lightbulb, CheckCircle, ArrowRight, Music } from "lucide-react";
+import { ArrowLeft, BookOpen, Play, FlaskConical, Clock, Lightbulb, CheckCircle, ArrowRight, Music, Check, Loader2, LogIn } from "lucide-react";
+import { useProgress, calculateModuleProgress } from "@/hooks/useProgress";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { toast } from "sonner";
 
 const typeIcons = {
   theory: BookOpen,
@@ -45,6 +49,10 @@ export default function LessonPage({
 }) {
   const { lessonId } = use(params);
   const result = findLesson(lessonId);
+  const router = useRouter();
+  const { user } = useAuth();
+  const { isLessonCompleted, toggleLessonComplete, getCompletedLessons, loading: progressLoading } = useProgress();
+  const [isToggling, setIsToggling] = useState(false);
 
   if (!result) {
     notFound();
@@ -60,6 +68,38 @@ export default function LessonPage({
   // Find next lesson
   const currentIndex = module.lessons.findIndex(l => l.id === lessonId);
   const nextLesson = module.lessons[currentIndex + 1];
+
+  // Progress tracking
+  const isCompleted = isLessonCompleted(lessonId);
+  const completedLessons = getCompletedLessons();
+  const moduleProgress = calculateModuleProgress(module.lessons, completedLessons);
+
+  const handleMarkComplete = async () => {
+    if (!user) {
+      router.push("/auth");
+      return;
+    }
+
+    setIsToggling(true);
+    const success = await toggleLessonComplete(lessonId);
+    setIsToggling(false);
+
+    if (success) {
+      if (!isCompleted) {
+        toast.success("Lesson completed!", {
+          description: nextLesson ? "Ready for the next one?" : "Great job finishing this module!",
+        });
+      }
+    } else {
+      toast.error("Failed to update progress");
+    }
+  };
+
+  const handleNextLesson = () => {
+    if (nextLesson) {
+      router.push(`/learn/lesson/${nextLesson.id}`);
+    }
+  };
 
   return (
     <main className="min-h-[calc(100vh-4rem)] p-8">
@@ -228,10 +268,18 @@ export default function LessonPage({
             <Card className="bg-card/50 border-border">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold">Your Progress</h3>
-                  <span className="text-muted-foreground text-sm">Not started</span>
+                  <h3 className="font-bold">Module Progress</h3>
+                  <span className="text-muted-foreground text-sm">
+                    {user ? `${moduleProgress}% complete` : "Sign in to track"}
+                  </span>
                 </div>
-                <Progress value={0} className="h-2" />
+                <Progress value={user ? moduleProgress : 0} className="h-2" />
+                {user && isCompleted && (
+                  <p className="text-sm text-gold mt-3 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    You've completed this lesson
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -247,33 +295,62 @@ export default function LessonPage({
                 <p className="text-muted-foreground text-sm mb-4">{module.description}</p>
                 <Separator className="mb-4" />
                 <div className="space-y-1">
-                  {module.lessons.map((l, i) => (
-                    <Link
-                      key={l.id}
-                      href={`/learn/lesson/${l.id}`}
-                      className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                        l.id === lessonId
-                          ? "gradient-gold text-black font-medium"
-                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                      }`}
-                    >
-                      {i + 1}. {l.title}
-                    </Link>
-                  ))}
+                  {module.lessons.map((l, i) => {
+                    const lessonCompleted = isLessonCompleted(l.id);
+                    return (
+                      <Link
+                        key={l.id}
+                        href={`/learn/lesson/${l.id}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                          l.id === lessonId
+                            ? "gradient-gold text-black font-medium"
+                            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                        }`}
+                      >
+                        {lessonCompleted ? (
+                          <Check className={`w-4 h-4 flex-shrink-0 ${l.id === lessonId ? "text-black" : "text-gold"}`} />
+                        ) : (
+                          <span className="w-4 text-center flex-shrink-0">{i + 1}.</span>
+                        )}
+                        <span className="truncate">{l.title}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
 
             {/* Actions */}
             <div className="space-y-3">
-              <Button className="w-full gradient-gold text-black hover:opacity-90">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Mark Complete
-              </Button>
-              <Button variant="secondary" className="w-full">
-                Next Lesson
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+              {user ? (
+                <Button
+                  className={`w-full ${isCompleted ? "bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30" : "gradient-gold text-black hover:opacity-90"}`}
+                  onClick={handleMarkComplete}
+                  disabled={isToggling || progressLoading}
+                >
+                  {isToggling ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : isCompleted ? (
+                    <Check className="w-4 h-4 mr-2" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                  )}
+                  {isCompleted ? "Completed" : "Mark Complete"}
+                </Button>
+              ) : (
+                <Link href="/auth" className="block">
+                  <Button className="w-full gradient-gold text-black hover:opacity-90">
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign in to Track Progress
+                  </Button>
+                </Link>
+              )}
+              {nextLesson && (
+                <Button variant="secondary" className="w-full" onClick={handleNextLesson}>
+                  Next Lesson
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
