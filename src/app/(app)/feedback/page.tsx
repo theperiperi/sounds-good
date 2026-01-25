@@ -82,7 +82,7 @@ export default function FeedbackPage() {
               </div>
               <h2 className="font-serif text-2xl font-bold mb-2">Thank You!</h2>
               <p className="text-muted-foreground mb-6">
-                Your feedback has been submitted. We truly appreciate you taking the time to help us improve.
+                Your feedback has been received, we truly appreciate you taking the time to help us improve. Here's a 🍪, hope you have a nice day :)
               </p>
               <Button
                 onClick={() => setSubmitted(false)}
