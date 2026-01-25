@@ -16,7 +16,10 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Sounds Good - Master Piano with World-Class Interactive Learning",
+  title: {
+    default: "Sounds Good - Learn Piano Online",
+    template: "%s | Sounds Good",
+  },
   description:
     "Transform your piano journey with Sounds Good. Interactive lessons, MIDI support, music theory visualization, and AI-powered sheet music transcription. Start learning today.",
   keywords: [
@@ -46,6 +49,10 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
 };
 
