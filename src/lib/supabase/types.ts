@@ -64,6 +64,29 @@ export interface Database {
           updated_at?: string;
         };
       };
+      feedback: {
+        Row: {
+          id: string;
+          user_id: string;
+          category: string;
+          message: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          category: string;
+          message: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          category?: string;
+          message?: string;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -79,3 +102,4 @@ export interface Database {
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type LessonProgress = Database["public"]["Tables"]["lesson_progress"]["Row"];
+export type Feedback = Database["public"]["Tables"]["feedback"]["Row"];

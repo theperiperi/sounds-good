@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Piano, BookOpen, Music, PenTool, Music2 } from "lucide-react";
+import { Piano, BookOpen, Music, PenTool, Music2, MessageSquare } from "lucide-react";
 import { MidiStatus } from "@/components/keyboard/MidiStatus";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { ModeToggle } from "@/components/ui/mode-toggle";
@@ -12,6 +12,7 @@ const tabs = [
   { href: "/learn", label: "Learn", icon: BookOpen },
   { href: "/play", label: "Play Songs", icon: Music },
   { href: "/compose", label: "Compose", icon: PenTool },
+  { href: "/feedback", label: "Feedback", icon: MessageSquare },
 ];
 
 export function Navigation() {
