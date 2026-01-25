@@ -8,7 +8,6 @@ import {
   BookOpen,
   PenTool,
   Play,
-  Sparkles,
   Check,
   ArrowRight,
   Star,
@@ -111,13 +110,6 @@ export default function LandingPage() {
             animate="animate"
             variants={staggerContainer}
           >
-            <motion.div variants={fadeInUp}>
-              <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Now with AI-Powered Sheet Music Transcription
-              </Badge>
-            </motion.div>
-
             <motion.h1
               variants={fadeInUp}
               className="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
