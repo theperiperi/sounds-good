@@ -86,3 +86,27 @@ CREATE TRIGGER update_profiles_updated_at
 CREATE TRIGGER update_lesson_progress_updated_at
   BEFORE UPDATE ON public.lesson_progress
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+-- Create feedback table
+CREATE TABLE IF NOT EXISTS public.feedback (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  category TEXT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Create index for feedback
+CREATE INDEX IF NOT EXISTS idx_feedback_user_id ON public.feedback(user_id);
+
+-- Enable Row Level Security for feedback
+ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
+
+-- Feedback policies (users can insert their own, but only admins can read all)
+CREATE POLICY "Users can insert their own feedback"
+  ON public.feedback FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own feedback"
+  ON public.feedback FOR SELECT
+  USING (auth.uid() = user_id);
