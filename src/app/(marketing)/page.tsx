@@ -78,7 +78,7 @@ export default function LandingPage() {
                 href="#pricing"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Pricing
+                Our Mission
               </a>
             </div>
 
@@ -177,7 +177,7 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-primary" />
-                <span>Cancel anytime</span>
+                <span>Free forever</span>
               </div>
             </motion.div>
           </motion.div>
@@ -512,7 +512,7 @@ export default function LandingPage() {
               },
               {
                 quote:
-                  "The AI sheet music transcription is a game-changer. I can upload any PDF and start learning immediately. Absolutely worth every penny.",
+                  "The AI sheet music transcription is a game-changer. I can upload any PDF and start learning immediately. Can't believe this is completely free!",
                 author: "Emma Thompson",
                 role: "Music Student",
                 rating: 5,
@@ -559,7 +559,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Free Forever Section */}
       <section
         id="pricing"
         className="py-24 px-4 sm:px-6 lg:px-8 bg-card/50"
@@ -572,144 +572,88 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
-              Pricing
+              100% Free
             </Badge>
             <h2 className="font-serif text-4xl sm:text-5xl font-bold mb-4">
-              Simple, <span className="gradient-gold-text">Transparent</span>{" "}
-              Pricing
+              Completely <span className="gradient-gold-text">Free</span>{" "}
+              Forever
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Start free and upgrade when you&apos;re ready. No hidden fees, no
-              surprises.
+              We believe music education should be accessible to everyone.
+              That&apos;s why Sounds Good is completely free—no trials, no tiers, no hidden costs.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free Plan */}
+          <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <Card className="glass-strong h-full">
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-xl">Free</CardTitle>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">$0</span>
-                    <span className="text-muted-foreground">/month</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-3">
-                    {[
-                      "Virtual keyboard access",
-                      "5 lessons per month",
-                      "Basic theory tools",
-                      "Community support",
-                    ].map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-primary shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/auth" className="block">
-                    <Button variant="outline" className="w-full mt-4">
-                      Get Started
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Pro Plan */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className="glass-strong h-full border-primary/50 shadow-premium-lg relative overflow-hidden">
+              <Card className="glass-strong border-primary/50 shadow-premium-lg relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 h-1 gradient-gold" />
                 <CardHeader className="text-center pb-4">
                   <div className="flex justify-center mb-2">
                     <Badge className="gradient-gold text-background">
-                      Most Popular
+                      Lifetime Access
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl">Pro</CardTitle>
+                  <CardTitle className="text-2xl">Everything Included</CardTitle>
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">$12</span>
-                    <span className="text-muted-foreground">/month</span>
+                    <span className="text-5xl font-bold gradient-gold-text">$0</span>
+                    <span className="text-muted-foreground ml-2">forever</span>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-3">
+                <CardContent className="space-y-6">
+                  <div className="grid sm:grid-cols-2 gap-4">
                     {[
-                      "Everything in Free",
-                      "Unlimited lessons",
+                      "Interactive virtual keyboard",
+                      "Unlimited lessons & courses",
                       "MIDI device support",
-                      "Full theory toolkit",
+                      "Full music theory toolkit",
                       "Song learning mode",
-                      "Progress analytics",
-                      "Priority support",
+                      "Progress tracking & analytics",
+                      "AI sheet music transcription",
+                      "Composition & export tools",
+                      "ABRSM-aligned curriculum",
+                      "Community access",
                     ].map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
+                      <div key={feature} className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-primary shrink-0" />
                         <span className="text-sm">{feature}</span>
-                      </li>
+                      </div>
                     ))}
-                  </ul>
-                  <Link href="/auth" className="block">
-                    <Button className="w-full mt-4 gradient-gold text-background hover:opacity-90">
-                      Start Free Trial
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Studio Plan */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="glass-strong h-full">
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-xl">Studio</CardTitle>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">$29</span>
-                    <span className="text-muted-foreground">/month</span>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ul className="space-y-3">
-                    {[
-                      "Everything in Pro",
-                      "AI sheet transcription",
-                      "Composition tools",
-                      "Export to PDF/MIDI",
-                      "Custom repertoire",
-                      "Offline access",
-                      "1-on-1 coaching call",
-                    ].map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-primary shrink-0" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/auth" className="block">
-                    <Button variant="outline" className="w-full mt-4">
-                      Contact Sales
+                  <Link href="/auth" className="block pt-4">
+                    <Button className="w-full gradient-gold text-background hover:opacity-90 text-lg py-6">
+                      Start Learning Now
+                      <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </Link>
+                  <p className="text-center text-sm text-muted-foreground">
+                    No credit card required. No strings attached.
+                  </p>
                 </CardContent>
               </Card>
             </motion.div>
           </div>
+
+          {/* Why Free */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-16 text-center max-w-2xl mx-auto"
+          >
+            <h3 className="font-serif text-2xl font-semibold mb-4">
+              Why is Sounds Good free?
+            </h3>
+            <p className="text-muted-foreground">
+              We&apos;re passionate about making quality music education accessible to everyone,
+              regardless of their financial situation. Our mission is to help people discover
+              the joy of playing piano, not to maximize profits.
+            </p>
+          </motion.div>
         </div>
       </section>
 
@@ -779,7 +723,7 @@ export default function LandingPage() {
                 </li>
                 <li>
                   <a href="#pricing" className="hover:text-foreground">
-                    Pricing
+                    Our Mission
                   </a>
                 </li>
               </ul>
