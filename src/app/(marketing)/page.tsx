@@ -17,6 +17,7 @@ import {
   Zap,
   Shield,
   Globe,
+  Github,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -83,6 +84,16 @@ export default function LandingPage() {
 
             <div className="flex items-center gap-4">
               <ModeToggle />
+              <a
+                href="https://github.com/theperiperi/sounds-good"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="ghost" size="sm">
+                  <Github className="w-4 h-4 mr-2" />
+                  GitHub
+                </Button>
+              </a>
               <Link href="/auth">
                 <Button variant="ghost" size="sm">
                   Sign In
